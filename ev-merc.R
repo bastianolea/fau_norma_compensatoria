@@ -30,95 +30,40 @@ max_superficie_vendible = superficie_max_util_const * (100-(.superficie_area_com
 ## ingresos ----
 
 ### tipologías ----
-.tamaño_tipo_1 = 38 #m2
-.tamaño_tipo_2 = 45 #m2
-.tamaño_tipo_3 = 52 #m2
-.tamaño_tipo_4 = 55 #m2
-.tamaño_tipo_5 = 62 #m2
+tamaños_tipos <- c(38, 45, 52, 55, 62) # m2
 
-tamaños_tipos <- c(.tamaño_tipo_1,
-                   .tamaño_tipo_2,
-                   .tamaño_tipo_3,
-                   .tamaño_tipo_4,
-                   .tamaño_tipo_5)
-
-
-.mercado_tramo_tipo_1 = "Mercado"
-.mercado_tramo_tipo_2 = "Mercado"
-.mercado_tramo_tipo_3 = "Mercado"
-.mercado_tramo_tipo_4 = "Mercado"
-.mercado_tramo_tipo_5 = "Mercado"
-
-mercado_o_tramos <- c(.mercado_tramo_tipo_1,
-                      .mercado_tramo_tipo_2,
-                      .mercado_tramo_tipo_3,
-                      .mercado_tramo_tipo_4,
-                      .mercado_tramo_tipo_5)
-
+mercado_o_tramos <- c("Mercado", "Mercado", "Mercado", "Mercado", "Mercado")
 
 ### cantidades ----
 # porcentajes
-.tipo_1_mercado = 0.15 #%
-.tipo_2_mercado = 0.20 #%
-.tipo_3_mercado = 0.25 #%
-.tipo_4_mercado = 0.15 #%
-.tipo_5_mercado = 0.25 #%
+porcentaje_tipos <- c(0.15, 0.20, 0.25, 0.15, 0.25)
 
 # total
-sum(.tipo_1_mercado, .tipo_2_mercado, .tipo_3_mercado, .tipo_4_mercado, .tipo_5_mercado) == 100
+sum(porcentaje_tipos) == 1
 
 # cantidades
-cantidad_unidades_tipo_1 = max_unidades_vendibles * (.tipo_1_mercado)
-cantidad_unidades_tipo_2 = max_unidades_vendibles * (.tipo_2_mercado)
-cantidad_unidades_tipo_3 = max_unidades_vendibles * (.tipo_3_mercado)
-cantidad_unidades_tipo_4 = max_unidades_vendibles * (.tipo_4_mercado)
-cantidad_unidades_tipo_5 = max_unidades_vendibles * (.tipo_5_mercado)
-
-cantidades_tipos <- c(cantidad_unidades_tipo_1,
-                      cantidad_unidades_tipo_2,
-                      cantidad_unidades_tipo_3,
-                      cantidad_unidades_tipo_4,
-                      cantidad_unidades_tipo_5)
+cantidades_tipos = max_unidades_vendibles * porcentaje_tipos
 
 total_cantidad_unidades = sum(cantidades_tipos)
 
 # superficie por tipo (mt2)
-superficie_tipo_1 = cantidad_unidades_tipo_1 * .tamaño_tipo_1
-superficie_tipo_2 = cantidad_unidades_tipo_2 * .tamaño_tipo_2
-superficie_tipo_3 = cantidad_unidades_tipo_3 * .tamaño_tipo_3
-superficie_tipo_4 = cantidad_unidades_tipo_4 * .tamaño_tipo_4
-superficie_tipo_5 = cantidad_unidades_tipo_5 * .tamaño_tipo_5
+superficies_tipos = cantidades_tipos * tamaños_tipos
 
 ### precio ----
 # precio del metro cuadrado por tipo
-.precio_m2_tipo_1 = 50 #uf/m2
-.precio_m2_tipo_2 = 50 #uf/m2
-.precio_m2_tipo_3 = 50 #uf/m2
-.precio_m2_tipo_4 = 50 #uf/m2
-.precio_m2_tipo_5 = 50 #uf/m2
+precios_m2_tipos = c(50, 50, 50, 50, 50)
 
 # precio de tipos en uf
-precio_tipo_1 = .tamaño_tipo_1 * .precio_m2_tipo_1
-precio_tipo_2 = .tamaño_tipo_2 * .precio_m2_tipo_2
-precio_tipo_3 = .tamaño_tipo_3 * .precio_m2_tipo_3
-precio_tipo_4 = .tamaño_tipo_4 * .precio_m2_tipo_4
-precio_tipo_5 = .tamaño_tipo_5 * .precio_m2_tipo_5
+precios_tipos = tamaños_tipos * precios_m2_tipos
 
-ingreso_deptos = sum((cantidad_unidades_tipo_1 * precio_tipo_1),
-                     (cantidad_unidades_tipo_2 * precio_tipo_2),
-                     (cantidad_unidades_tipo_3 * precio_tipo_3),
-                     (cantidad_unidades_tipo_4 * precio_tipo_4),
-                     (cantidad_unidades_tipo_5 * precio_tipo_5)) #uf
-
+ingreso_deptos = sum(cantidades_tipos * precios_tipos)
 
 ### dotación estacionamientos ----
-
-
 # dotación
-.dotacion_estacionamiento_viv_menor_50m2 = 0.3 #un/viv
-.dotacion_estacionamiento_viv_sobre_50m2_menor_100m2 = 0.5 #un/viv
-.dotacion_estacionamiento_viv_social = 0 #un/viv
-.dotacion_estacionamiento_rebaja = 0 #%
+.dotacion_est_viv_menor_50m2 = 0.3 #un/viv
+.dotacion_est_viv_sobre_50m2_menor_100m2 = 0.5 #un/viv
+.dotacion_est_viv_social = 0 #un/viv
+.dotacion_est_rebaja = 0 #%
 
 # total estacionamientos
 .estacionamiento_subterraneo = 0.50 #%
@@ -126,11 +71,11 @@ ingreso_deptos = sum((cantidad_unidades_tipo_1 * precio_tipo_1),
 .estacionamiento_visita = 0.15 #%
 
 # para total_estacionamientos
-total_estac_viv_menor_50m2 <- sum(ifelse(tamaños_tipos < 50, cantidades_tipos * dotacion_estacionamiento_viv_menor_50m2, 0))
-total_estac_viv_sobre_50m2_menor_100m2 <- sum(ifelse(tamaños_tipos >= 50 & tamaños_tipos < 100, cantidades_tipos * dotacion_estacionamiento_viv_sobre_50m2_menor_100m2, 0))
+total_estac_viv_menor_50m2 <- sum(ifelse(tamaños_tipos < 50, cantidades_tipos * .dotacion_est_viv_menor_50m2, 0))
+total_estac_viv_sobre_50m2_menor_100m2 <- sum(ifelse(tamaños_tipos >= 50 & tamaños_tipos < 100, cantidades_tipos * .dotacion_est_viv_sobre_50m2_menor_100m2, 0))
 
 # ifelse(mercado_o_tramos == "Tramo 1", tamaños_tipos, 0) parece que primero es esto y luego procede
-total_estac_viv_social <- sum(ifelse(mercado_o_tramos == "Mercado", cantidades_tipos * .dotacion_estacionamiento_viv_social, 0))
+total_estac_viv_social <- sum(ifelse(mercado_o_tramos == "Mercado", cantidades_tipos * .dotacion_est_viv_social, 0))
 
 total_estacionamientos <- sum(total_estac_viv_menor_50m2,
                               total_estac_viv_sobre_50m2_menor_100m2,
@@ -138,30 +83,28 @@ total_estacionamientos <- sum(total_estac_viv_menor_50m2,
 
 total_estacionamientos_vendibles = sum(total_estac_viv_menor_50m2,
                                        total_estac_viv_sobre_50m2_menor_100m2)
-
-# vendib_estacionamientos #un
+# (!) sale ligeramente distinto, 130 vs 126, debe ser por redondeos
 
 ### bodega ----
-.bodega_dotacion = 1.0 #un/viv
-# total bodegas
-total_bodegas = .bodega_dotacion * total_cantidad_unidades #un
+.bodega_dotacion = 1.0 # un/viv
 
-# superficie exterior 
-# ((total_estacionamientos * .estacionamiento_visita) + (total_estacionamientos * .estacionamiento_exterior)) * 12.5 #m2
+total_bodegas = .bodega_dotacion * total_cantidad_unidades # un
 
-# superficie subterránea 
-# ((total_estacionamientos * .estacionamiento_subterraneo) * 12.5) + (total_bodegas * 3) #m2
+superficie_exterior = ((total_estacionamientos * .estacionamiento_visita) + (total_estacionamientos * .estacionamiento_exterior)) * 12.5 # m2
+superficie_subterranea = ((total_estacionamientos * .estacionamiento_subterraneo) * 12.5) + (total_bodegas * 3) # m2
 
 # precio bodega
-.precio_estacionamiento_subterraneo = 250 #uf
-.precio_estacionamiento_exterior = 150 #uf
-.precio_bodega = 80 #uf
+.precio_estacionamiento_subterraneo = 250 # uf
+.precio_estacionamiento_exterior = 150 # uf
+.precio_bodega = 80 # uf
 
-ingreso_bodega_estacionamiento = (.precio_estacionamiento_exterior*vendib*.estacionamiento_exterior) +
-  (.precio_estacionamiento_subterraneo*vendib*.estacionamiento_subterraneo) +
-  (.precio_bodega*total_bodegas)
+ingreso_bodega_estacionamiento = 
+  (.precio_estacionamiento_exterior * total_estacionamientos_vendibles * .estacionamiento_exterior) +
+  (.precio_estacionamiento_subterraneo * total_estacionamientos_vendibles * .estacionamiento_subterraneo) +
+  (.precio_bodega * total_bodegas) # uf 
 
-total_ingreso = ingreso_deptos + ingreso_bodega_estacionamiento
+total_ingreso = ingreso_deptos + ingreso_bodega_estacionamiento # uf 
+
 
 ## costos ----
 
@@ -176,19 +119,31 @@ total_ingreso = ingreso_deptos + ingreso_bodega_estacionamiento
 
 ### costos proyecto ----
 # Arquitectura / Calculo / Otras Especialidades	2,0	%
-.costo_proyecto_arquitectura = 2.0 #%
+.costo_proyecto_arquitectura = 0.020 #%
 # Permisos / Empalmes / D° municipales 	2,5	%
-.costo_proyecto_permisos = 2.5	#%
+.costo_proyecto_permisos = 0.025	#%
 
 # gastos administrativos
-.costo_proyecto_administrativo_comercialización = 2.5 #%
-.costo_proyecto_administrativo_publicidad = 4.0 #%
-.costo_proyecto_administrativo_administración = 3.5 #%
+.costo_proyecto_administrativo_comercialización = 0.025 #%
+.costo_proyecto_administrativo_publicidad = 0.040 #%
+.costo_proyecto_administrativo_administración = 0.035 #%
 
 ### subtotales ----
 subtotal_terreno = .valor_suelo_uf * .sup_total_terreno #uf
-# subtotal_directo #uf
-# subtotal_indirecto #uf
+
+suma_mercado <- sum(ifelse(mercado_o_tramos == "Mercado", superficies_tipos, 0))
+suma_tramo_1 <- sum(ifelse(mercado_o_tramos == "Tramo 1", superficies_tipos, 0))
+
+subtotal_directo = (.costo_construccion_sobre_nt1 * suma_mercado / ((100 - (.superficie_area_comun*100)) / 100)) +
+  (.costo_construccion_sobre_nt2 * suma_tramo_1 / ((100 - (.superficie_area_comun*100)) / 100)) +
+  (.costo_construccion_subterraneo * superficie_subterranea) +
+  (.costo_construccion_estacionamiento_exterior * superficie_exterior) +
+  (.costo_urbanizacion_areaverde_exterior * superficie_neta) # uf
+
+subtotal_indirecto = total_ingreso * sum(.costo_proyecto_administrativo_comercialización,
+                    .costo_proyecto_administrativo_publicidad,
+                    .costo_proyecto_administrativo_administración) +
+  ((.costo_proyecto_arquitectura + .costo_proyecto_permisos) * subtotal_directo) # uf
 
 costo_total = subtotal_terreno + subtotal_directo + subtotal_indirecto
 
@@ -196,7 +151,7 @@ costo_total = subtotal_terreno + subtotal_directo + subtotal_indirecto
 ## rentabilidad ----
 
 ### rentabilidad mercado ----
-
 total_ganancia = total_ingreso - costo_total #uf
 
-rentabilidad = total_ganancia / (costo_total*100)#%
+rentabilidad = total_ganancia / (costo_total*100) # %
+
