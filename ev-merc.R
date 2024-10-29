@@ -157,6 +157,7 @@ ingreso_bodega_estacionamiento =
 total_ingreso = ingreso_deptos + ingreso_bodega_estacionamiento # uf 
 # ok en ev-int1
 
+
 ## costos ----
 
 ### costos construccion ----
