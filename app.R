@@ -4,6 +4,7 @@ library(htmltools)
 library(shinyWidgets)
 library(glue)
 library(thematic)
+library(shinyjs)
 
 library(reactlog)
 reactlog::reactlog_enable()
@@ -28,6 +29,8 @@ ui <- page_fluid(
     base_font = bslib::font_google("Roboto Condensed")
   ),
   
+  useShinyjs(),
+  
   tags$style(
     HTML("h4 {margin-top: 6px;}
           h3 {margin-top: 6px;}")
@@ -49,34 +52,48 @@ ui <- page_fluid(
                )
            ) |> tooltip("Cambiar escenario para establecer inputs predefinidos")
     ),
-    column(12,
-           checkboxInput(
-             inputId = "castigo",
-             label = "Aplicar castigo", 
-             value = FALSE
-           ),
-           cifra("p_integracion:", textOutput("p_integracion")),
-           cifra("p_castigo:", textOutput("p_castigo"))
+    
+    hr(),
+    
+    column(6,
+           fluidRow(
+             column(6,
+                    checkboxInput(
+                      inputId = "castigo",
+                      label = "Aplicar castigo", 
+                      value = FALSE
+                    ),
+                    actionButton("castigo_opciones", "Mostrar betas castigo")
+             ),
+             column(6,
+                    cifra("p_integracion:", textOutput("p_integracion")),
+                    cifra("p_castigo:", textOutput("p_castigo"))
+             )
+           )
     )
   ),
   
+  hr(),
+  
   fluidRow(
     column(4,
+           h3("Datos terreno"),
+           
            numericInput("sup_total_terreno",
                         label = "sup_total_terreno",
-                        value = 7281),
+                        value = 7281, step = 1),
            
            numericInput("faja_up_expropiacion",
                         label = "faja_up_expropiacion",
-                        value = 1634),
+                        value = 1634, step = 1),
            
            numericInput("faja_exterior_eje_ep",
                         label = "faja_exterior_eje_ep",
-                        value = 565),
+                        value = 565, step = 1),
            
            numericInput("valor_suelo_uf",
                         label = "valor_suelo_uf",
-                        value = 14.5)
+                        value = 14.5, step = 0.5)
     ),
     
     column(4,
@@ -85,13 +102,13 @@ ui <- page_fluid(
              h3("PRECIOS MÁXIMOS INTEGRACIÓN"),
              numericInput("precio_max_int_t1",
                           label = ".precio_max_int_t1",
-                          value = 1400),
+                          value = 1400, step = 100),
              numericInput("precio_max_int_t2",
                           label = ".precio_max_int_t2",
-                          value = 1700),
+                          value = 1700, step = 100),
              numericInput("precio_max_int_t3",
                           label = ".precio_max_int_t3",
-                          value = 2250)
+                          value = 2250, step = 100)
            ),
            
            
@@ -100,25 +117,25 @@ ui <- page_fluid(
                        min = 1, max = 4, value = 3,
                        width = "100%")
     ),
-    column(4,
+    column(4, id = "opciones_castigo",
            # CASTIGO POR INTEGRACIÓN	
            div_panel(
              h3("CASTIGO POR INTEGRACIÓN"),
              numericInput("b_integracion",
                           "b_integracion",
-                          0.00891),
+                          0.00891, step = 0.0001),
              numericInput("b_descuento",
                           "b_descuento",
-                          0.02094),
+                          0.02094, step = 0.0001),
              numericInput("b_espaciopublico_integracion",
                           "b_espaciopublico_integracion",
-                          -0.01580),
+                          -0.01580, step = 0.0001),
              numericInput("b_unidades_integracion",
                           "b_unidades_integracion",
-                          -0.00005)
+                          -0.00005, step = 0.00001)
            )
            
-    )
+    ) |> hidden()
   ),
   
   hr(),
@@ -131,19 +148,20 @@ ui <- page_fluid(
              column(6,
                     numericInput("normativa_densidad",
                                  label = "normativa_densidad",
-                                 value = 1500),
+                                 value = 1500, step = 100),
                     
                     numericInput("normativa_construccion",
                                  label = "normativa_construccion",
-                                 value = 3.2)
+                                 value = 3.2, step = 0.1)
              ),
              column(6,
+                    h4("Compensación"),
                     numericInput("compensacion_densidad",
                                  label = "compensacion_densidad (%)",
-                                 value = 1),
+                                 value = 1, min = 1, max = 10, step = 0.05),
                     numericInput("compensacion_construccion",
                                  label = "compensacion_construccion (%)",
-                                 value = 1)
+                                 value = 1, min = 1, max = 10, step = 0.05)
              )
            ),
            
@@ -153,7 +171,7 @@ ui <- page_fluid(
            
            numericInput("superficie_area_comun",
                         "superficie_area_comun",
-                        0.15)
+                        value = 0.15, min = 0, max = 1, step = 0.01)
            
     ),
     column(6,
@@ -208,19 +226,19 @@ ui <- page_fluid(
                ),
                column(3,
                       em("Porcentaje"),
-                      numericInput("porcentaje_s1", label = NULL, value = 0.15, min = 0, max = 1, width = "100%"),
-                      numericInput("porcentaje_s2", label = NULL, value = 0.20, min = 0, max = 1, width = "100%"),
-                      numericInput("porcentaje_s3", label = NULL, value = 0.25, min = 0, max = 1, width = "100%"),
-                      numericInput("porcentaje_s4", label = NULL, value = 0.15, min = 0, max = 1, width = "100%"),
-                      numericInput("porcentaje_s5", label = NULL, value = 0.25, min = 0, max = 1, width = "100%")
+                      numericInput("porcentaje_s1", label = NULL, value = 0.15, step = 0.05, min = 0, max = 1, width = "100%"),
+                      numericInput("porcentaje_s2", label = NULL, value = 0.20, step = 0.05, min = 0, max = 1, width = "100%"),
+                      numericInput("porcentaje_s3", label = NULL, value = 0.25, step = 0.05, min = 0, max = 1, width = "100%"),
+                      numericInput("porcentaje_s4", label = NULL, value = 0.15, step = 0.05, min = 0, max = 1, width = "100%"),
+                      numericInput("porcentaje_s5", label = NULL, value = 0.25, step = 0.05, min = 0, max = 1, width = "100%")
                ),
                column(3,
                       em("Precio"),
-                      numericInput("precios_m2_tipos_s1", label = NULL, value = 50, min = 0, width = "100%"),
-                      numericInput("precios_m2_tipos_s2", label = NULL, value = 50, min = 0, width = "100%"),
-                      numericInput("precios_m2_tipos_s3", label = NULL, value = 50, min = 0, width = "100%"),
-                      numericInput("precios_m2_tipos_s4", label = NULL, value = 50, min = 0, width = "100%"),
-                      numericInput("precios_m2_tipos_s5", label = NULL, value = 50, min = 0, width = "100%"),
+                      numericInput("precios_m2_tipos_s1", label = NULL, value = 50, step = 5, min = 0, width = "100%"),
+                      numericInput("precios_m2_tipos_s2", label = NULL, value = 50, step = 5, min = 0, width = "100%"),
+                      numericInput("precios_m2_tipos_s3", label = NULL, value = 50, step = 5, min = 0, width = "100%"),
+                      numericInput("precios_m2_tipos_s4", label = NULL, value = 50, step = 5, min = 0, width = "100%"),
+                      numericInput("precios_m2_tipos_s5", label = NULL, value = 50, step = 5, min = 0, width = "100%"),
                )
              )
            )
@@ -239,65 +257,57 @@ ui <- page_fluid(
   
   ### estacionamientos ----
   fluidRow(
-    column(12,
-           h3("Estacionamientos")
-    ),
-    column(6, 
+    column(3,
+           h3("Estacionamientos"),
            numericInput("dotacion_est_viv_menor_50m2",
                         "dotacion_est_viv_menor_50m2",
-                        0.33),
+                        0.33, step = 0.1),
            numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
                         "dotacion_est_viv_sobre_50m2_menor_100m2",
-                        0.5),
+                        0.5, step = 0.1),
            numericInput("dotacion_est_rebaja",
                         "dotacion_est_rebaja",
-                        0),
+                        0, step = 0.5),
            numericInput("dotacion_est_viv_social",
                         "dotacion_est_viv_social",
-                        0),
+                        0, step = 0.5),
            
            # total estacionamientos
            numericInput("estacionamiento_subterraneo",
                         "estacionamiento_subterraneo",
-                        0.50),
+                        0.50, step = 0.05),
            numericInput("estacionamiento_exterior",
                         "estacionamiento_exterior",
-                        0.50),
+                        0.50, step = 0.05),
            numericInput("estacionamiento_visita",
                         "estacionamiento_visita",
-                        0.15)
+                        0.15, step = 0.05)
     ),
-    column(6,
+    column(3,
            cifra("total_estac_viv_menor_50m2", textOutput("total_estac_viv_menor_50m2")),
            cifra("total_estac_viv_sobre_50m2_menor_100m2", textOutput("total_estac_viv_sobre_50m2_menor_100m2")),
            cifra("total_estac_viv_social", textOutput("total_estac_viv_social")),
            cifra("total_estacionamientos", textOutput("total_estacionamientos")),
            cifra("total_estacionamientos_vendibles", textOutput("total_estacionamientos_vendibles")),
-    )
-  ),
-  
-  hr(),
-  
-  ### bodegas ----
-  fluidRow(
-    column(12,
-           h3("Bodegas")
     ),
-    column(6,
+    
+    ### bodegas ----
+    column(3,
+           h3("Bodegas"),
            numericInput("bodega_dotacion", 
                         "bodega_dotacion", 
-                        1),
+                        1, step = 0.5),
            numericInput("precio_estacionamiento_subterraneo", 
                         "precio_estacionamiento_subterraneo", 
-                        250),
+                        250, step = 5),
            numericInput("precio_estacionamiento_exterior", 
                         "precio_estacionamiento_exterior", 
-                        150),
+                        150, step = 5),
            numericInput("precio_bodega", 
                         "precio_bodega", 
-                        80)
+                        80, step = 5)
     ),
-    column(6,
+    column(3,
            cifra("total_bodegas", textOutput("total_bodegas")),
            cifra("superficie_exterior", textOutput("superficie_exterior")),
            cifra("superficie_subterranea", textOutput("superficie_subterranea")),
@@ -318,49 +328,49 @@ ui <- page_fluid(
   
   ## costos ----
   fluidRow(
-    column(6, 
+    column(3, 
            
            h3("Costos"),
            
            numericInput("costo_construccion_sobre_nt1",
                         "costo_construccion_sobre_nt1",
-                        24),
+                        24, step = 1),
            numericInput("costo_construccion_sobre_nt2",
                         "costo_construccion_sobre_nt2",
-                        18),
+                        18, step = 1),
            numericInput("costo_construccion_subterraneo",
                         "costo_construccion_subterraneo",
-                        14),
+                        14, step = 1),
            numericInput("costo_construccion_estacionamiento_exterior",
                         "costo_construccion_estacionamiento_exterior",
-                        5.0),
+                        5.0, step = 1),
            
            # costo urbanizacion
            numericInput("costo_urbanizacion_areaverde_exterior",
                         "costo_urbanizacion_areaverde_exterior",
-                        2.0),
+                        2.0, step = 1),
            
            ### costos proyecto
            numericInput("costo_proyecto_arquitectura",
                         "costo_proyecto_arquitectura",
-                        0.020),
+                        0.020, step = 0.01),
            numericInput("costo_proyecto_permisos",
                         "costo_proyecto_permisos",
-                        0.025),
+                        0.025, step = 0.01),
            
            # gastos administrativos
            numericInput("costo_proyecto_administrativo_comercialización",
                         "costo_proyecto_administrativo_comercialización",
-                        0.025),
+                        0.025, step = 0.01),
            numericInput("costo_proyecto_administrativo_publicidad",
                         "costo_proyecto_administrativo_publicidad",
-                        0.040),
+                        0.040, step = 0.01),
            numericInput("costo_proyecto_administrativo_administración",
                         "costo_proyecto_administrativo_administración",
-                        0.035)
+                        0.035, step = 0.01)
            
     ),
-    column(6,
+    column(3,
            cifra("subtotal_terreno:", textOutput("subtotal_terreno")),
            
            br(),
@@ -389,25 +399,26 @@ ui <- page_fluid(
   hr(),
   
   ## rentabilidad ----
+  # flotante
   fluidRow(
     column(12,
-           
-           
            div(style = css(position = "fixed",
                            bottom = "12px", right = "12px"),
                div(style = css(padding = "18px",
                                background_color = color$detalle,
                                border = paste("3px solid", color$fondo),
                                border_radius = "10px"),
-                   h3("Resultados", style = css(margin = 0)),
-                   cifra("resultado_ingreso_deptos:", textOutput("resultado_ingreso_deptos")),
-                   cifra("resultado_ingreso_bodega_estacionamiento:", textOutput("resultado_ingreso_bodega_estacionamiento")),
-                   cifra("resultado_total_ingreso:", textOutput("resultado_total_ingreso")),
-                   cifra("resultado_total_ganancia:", textOutput("resultado_total_ganancia")),
-                   cifra("resultado_costo_total:", textOutput("resultado_costo_total")),
-                   cifra("resultado_rentabilidad:", textOutput("resultado_rentabilidad"))
+                   uiOutput("resultados_rentabilidad"),
                )
            )
+    )
+  ),
+  
+  # estática
+  fluidRow(
+    column(12,
+           uiOutput("resultados_rentabilidad_2"),
+           br()
     )
   )
 )
@@ -434,6 +445,9 @@ server <- function(input, output, session) {
       
       updateNumericInput(session, "dotacion_est_viv_social", value = 0)
       
+      updateNumericInput(session, "compensacion_densidad", value = 1)
+      updateNumericInput(session, "compensacion_construccion", value = 1)
+      
     } else if (input$escenario == "EV-INT1") {
       updateSelectInput(session, "tramo_s1", selected = "Mercado") 
       updateSelectInput(session, "tramo_s2", selected = "Tramo 3") 
@@ -448,6 +462,9 @@ server <- function(input, output, session) {
       updateNumericInput(session, "precios_m2_tipos_s5", value = 50)
       
       updateNumericInput(session, "dotacion_est_viv_social", value = 1)
+      
+      updateNumericInput(session, "compensacion_densidad", value = 1)
+      updateNumericInput(session, "compensacion_construccion", value = 1)
       
     } else if (input$escenario == "EV-INT2") {
       updateSelectInput(session, "tramo_s1", selected = "Mercado") 
@@ -470,8 +487,12 @@ server <- function(input, output, session) {
   })
   
   
+  
   ## castigo ----
   
+  observeEvent(input$castigo_opciones, {
+    toggle("opciones_castigo")
+  })
   
   p_integracion = reactive(
     ifelse(mercado_o_tramos() != "Mercado", porcentaje_tipos(), 0) |> sum()
@@ -493,6 +514,7 @@ server <- function(input, output, session) {
   output$p_integracion <- renderText(p_integracion() |> porcentaje())
   output$p_castigo <- renderText(p_castigo() |> porcentaje())
   
+  # —----
   
   ## cabida ----
   output$sup_total_terreno <- renderText(input$sup_total_terreno |> mt2())
@@ -698,7 +720,7 @@ server <- function(input, output, session) {
   output$total_costo_construccion_estacionamiento_exterior <- renderText(total_costo_construccion_estacionamiento_exterior() |> uf())
   output$total_costo_urbanizacion_areaverde_exterior <- renderText(total_costo_urbanizacion_areaverde_exterior() |> uf())
   
-  # costo directo
+  ### costo directo ----
   subtotal_directo = reactive(
     sum(total_costo_construccion_sobre_nt1(),
         total_costo_construccion_sobre_nt2(),
@@ -732,44 +754,44 @@ server <- function(input, output, session) {
   #     )
   # )
   
-  # costo indirecto  
+  ## costo indirecto  ----
   costo_proyecto = reactive((input$costo_proyecto_arquitectura + input$costo_proyecto_permisos) * subtotal_directo())
   gastos_administrativos = reactive(total_ingreso() * sum(input$costo_proyecto_administrativo_comercialización, input$costo_proyecto_administrativo_publicidad, input$costo_proyecto_administrativo_administración))
   # uno de estos dos está incorrecto
   
-  # incorrecto:
+  # incorrecto en ev 1 y 2, correcto degún ev merc y ev proy
   subtotal_indirecto = reactive(costo_proyecto() + gastos_administrativos()) # mayor en int1
   
   # formula subtotal indirecto
   # subtotal_indirecto = reactive({
   #   ((
-  #   (
-  #     (input$costo_proyecto_arquitectura + input$costo_proyecto_permisos) *
-  #       ((total_costo_construccion_sobre_nt1() *
-  #           (suma_superficies_totales()/(100-input$superficie_area_comun)) - (suma_superficies_tramo_2() + (suma_superficies_tramo_1()))) +
-  #           total_costo_construccion_subterraneo() + total_costo_construccion_estacionamiento_exterior() + total_costo_urbanizacion_areaverde_exterior()
+  #     (
+  #       (input$costo_proyecto_arquitectura + input$costo_proyecto_permisos) *
+  #         ((total_costo_construccion_sobre_nt1() *
+  #             (suma_superficies_totales()/(100-input$superficie_area_comun)) - (suma_superficies_tramo_2() + (suma_superficies_tramo_1()))) +
+  #            total_costo_construccion_subterraneo() + total_costo_construccion_estacionamiento_exterior() + total_costo_urbanizacion_areaverde_exterior()
   #         )
-  #        )
   #     )
-  #    / 100) +
-  # ((total_ingreso() - ingreso_deptos()) * (
-  # sum(input$costo_proyecto_administrativo_comercialización, input$costo_proyecto_administrativo_publicidad, input$costo_proyecto_administrativo_administración) # (H37+H38+H39)
-  # /100))
+  #   )
+  #   / 100) +
+  #     ((total_ingreso() - ingreso_deptos()) * (
+  #       sum(input$costo_proyecto_administrativo_comercialización, input$costo_proyecto_administrativo_publicidad, input$costo_proyecto_administrativo_administración) # (H37+H38+H39)
+  #       /100))
   # })
-
-    # todo esto es ingreso_deptos() 
-# cantidades_tramo1 = reactive(ifelse(mercado_o_tramos() == "Tramo 1", cantidades_tipos(), 0))
-# cantidades_tramo2 = reactive(ifelse(mercado_o_tramos() == "Tramo 2", cantidades_tipos(), 0))
-# cantidades_tramo3 = reactive(ifelse(mercado_o_tramos() == "Tramo 3", cantidades_tipos(), 0))
-# 
-# precios_tramo1 = reactive(ifelse(mercado_o_tramos() == "Tramo 1", precios_tipos(), 0))
-# precios_tramo2 = reactive(ifelse(mercado_o_tramos() == "Tramo 2", precios_tipos(), 0))
-# precios_tramo3 = reactive(ifelse(mercado_o_tramos() == "Tramo 3", precios_tipos(), 0))
-# 
-# (cantidades_tramo1() * precios_tramo1()) +
-# (cantidades_tramo2() * precios_tramo2()) +
-# (cantidades_tramo3() * precios_tramo3())
-
+  
+  # todo esto es ingreso_deptos() 
+  # cantidades_tramo1 = reactive(ifelse(mercado_o_tramos() == "Tramo 1", cantidades_tipos(), 0))
+  # cantidades_tramo2 = reactive(ifelse(mercado_o_tramos() == "Tramo 2", cantidades_tipos(), 0))
+  # cantidades_tramo3 = reactive(ifelse(mercado_o_tramos() == "Tramo 3", cantidades_tipos(), 0))
+  # 
+  # precios_tramo1 = reactive(ifelse(mercado_o_tramos() == "Tramo 1", precios_tipos(), 0))
+  # precios_tramo2 = reactive(ifelse(mercado_o_tramos() == "Tramo 2", precios_tipos(), 0))
+  # precios_tramo3 = reactive(ifelse(mercado_o_tramos() == "Tramo 3", precios_tipos(), 0))
+  # 
+  # (cantidades_tramo1() * precios_tramo1()) +
+  # (cantidades_tramo2() * precios_tramo2()) +
+  # (cantidades_tramo3() * precios_tramo3())
+  
   output$costo_proyecto <- renderText(costo_proyecto() |> uf())
   output$gastos_administrativos <- renderText(gastos_administrativos() |> uf())
   output$subtotal_indirecto <- renderText(subtotal_indirecto() |> uf())
@@ -804,6 +826,34 @@ server <- function(input, output, session) {
   output$resultado_rentabilidad <- renderText(rentabilidad() |> porcentaje())
   
   
+  # output
+  output$resultados_rentabilidad_2 <- output$resultados_rentabilidad <- renderUI({
+    req(ingreso_deptos(),
+        ingreso_bodega_estacionamiento(),
+        total_ingreso(),
+        total_ganancia(),
+        costo_total(),
+        rentabilidad())
+    # browser()
+    div(
+      h3("Resultados", style = css(margin = 0)),
+      # cifra("resultado_ingreso_deptos:", textOutput("resultado_ingreso_deptos")),
+      # cifra("resultado_ingreso_bodega_estacionamiento:", textOutput("resultado_ingreso_bodega_estacionamiento")),
+      # cifra("resultado_total_ingreso:", textOutput("resultado_total_ingreso")),
+      # cifra("resultado_total_ganancia:", textOutput("resultado_total_ganancia")),
+      # cifra("resultado_costo_total:", textOutput("resultado_costo_total")),
+      # cifra("resultado_rentabilidad:", textOutput("resultado_rentabilidad"))
+      
+      cifra("resultado_ingreso_deptos:", ingreso_deptos() |> uf()),
+      cifra("resultado_ingreso_bodega_estacionamiento:", ingreso_bodega_estacionamiento() |> uf()),
+      cifra("resultado_total_ingreso:", total_ingreso() |> uf()),
+      cifra("resultado_total_ganancia:", total_ganancia() |> uf()),
+      cifra("resultado_costo_total:", costo_total() |> uf()),
+      cifra("resultado_rentabilidad:", rentabilidad() |> porcentaje())
+    )
+  })
+  
+  # —----
   # notificaciones ----
   rentabilidad_d <- rentabilidad |> debounce(200)
   
