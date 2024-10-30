@@ -48,6 +48,7 @@ ui <- page_fluid(
                  individual = T,
                  label = "Escenarios de evaluación", 
                  choices = c("EV-MERC", "EV-INT1", "EV-INT2"), 
+                 selected = "EV-INT1",
                  width = "100%"
                )
            ) |> tooltip("Cambiar escenario para establecer inputs predefinidos")
@@ -248,6 +249,7 @@ ui <- page_fluid(
            cifra("cantidades_tipos", textOutput("cantidades_tipos")),
            cifra("total_cantidad_unidades", textOutput("total_cantidad_unidades")),
            cifra("superficies_tipos", textOutput("superficies_tipos")),
+           cifra("total_superficie_unidades", textOutput("total_superficie_unidades")),
            cifra("precios_tipos", textOutput("precios_tipos")),
            cifra("ingreso_deptos", textOutput("ingreso_deptos"))
     )
@@ -376,11 +378,12 @@ ui <- page_fluid(
            br(),
            cifra("suma_superficies_totales:", textOutput("suma_superficies_totales")),
            cifra("suma_superficies_mercado:", textOutput("suma_superficies_mercado")),
-           cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
+           # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
            
            br(),
            cifra("total_costo_construccion_sobre_nt1:", textOutput("total_costo_construccion_sobre_nt1")),
            cifra("total_costo_construccion_sobre_nt2:", textOutput("total_costo_construccion_sobre_nt2")),
+           br(),
            cifra("total_costo_construccion_subterraneo:", textOutput("total_costo_construccion_subterraneo")),
            cifra("total_costo_construccion_estacionamiento_exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
            cifra("total_costo_urbanizacion_areaverde_exterior:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
@@ -389,8 +392,8 @@ ui <- page_fluid(
            cifra("costo_proyecto:", textOutput("costo_proyecto")),
            cifra("gastos_administrativos:", textOutput("gastos_administrativos")),
            br(),
-           cifra("subtotal_directo:", textOutput("subtotal_directo")),
-           cifra("subtotal_indirecto:", textOutput("subtotal_indirecto")),
+           cifra("costo_directo:", textOutput("costo_directo")),
+           cifra("costo_indirecto:", textOutput("costo_indirecto")),
            br(),
            cifra("costo_total:", textOutput("costo_total")),      
     )
@@ -503,9 +506,10 @@ server <- function(input, output, session) {
     # browser()
     
     # ('DATOS (CASO-1)'!I6 * R15 + 'DATOS (CASO-1)'!I8 * R15 /'DATOS (CASO-1)'!I11 + 'DATOS (CASO-1)'!I9 * R15 * J20) / 'DATOS (CASO-1)'!I7*-1
+    
     (input$b_integracion * p_integracion() + input$b_espaciopublico_integracion * 
        p_integracion() / input$calidad_ep + input$b_unidades_integracion * 
-       p_integracion() * 
+       p_integracion() * # acá está malo
        total_cantidad_unidades()) / 
       input$b_descuento * -1
     # esto no da 44 jamás
@@ -535,8 +539,19 @@ server <- function(input, output, session) {
   superficie_max_util_const = reactive(superficie_neta() * normativa_construccion())
   output$superficie_max_util_const <- renderText(superficie_max_util_const() |> mt2())
   
-  area_comun_mt2 = reactive(superficie_max_util_const() * input$superficie_area_comun)
+  # area_comun_mt2 = reactive(superficie_max_util_const() * input$superficie_area_comun)
+  
+  
+  # area común teórica
+  area_comun_mt2 = reactive(total_superficie_unidades() * input$superficie_area_comun)
+  
+  superficie_total_proyecto = reactive(total_superficie_unidades()/0.85)
+  
+  area_comun_proyecto = reactive(superficie_total_proyecto()-  total_superficie_unidades())
+  
+  
   output$area_comun_mt2 <- renderText(area_comun_mt2() |> mt2())
+  output$area_comun_proyecto <- renderText(area_comun_proyecto() |> mt2())
   
   # máximos vendibles
   max_unidades_vendibles = reactive(
@@ -580,6 +595,8 @@ server <- function(input, output, session) {
   cantidades_tipos = reactive(max_unidades_vendibles() * porcentaje_tipos())
   output$cantidades_tipos <- renderText(cantidades_tipos() |> round())
   
+  cantidades_tipos_mercado = reactive(ifelse(mercado_o_tramos() == "Mercado", cantidades_tipos(), 0)) # se usa para gastos administrativos
+  
   total_cantidad_unidades = reactive(sum(cantidades_tipos()) |> round())
   output$total_cantidad_unidades <- renderText(total_cantidad_unidades())
   
@@ -587,6 +604,8 @@ server <- function(input, output, session) {
   superficies_tipos = reactive(cantidades_tipos() * tamaños_tipos())
   output$superficies_tipos <- renderText(superficies_tipos() |> mt2())
   
+  total_superficie_unidades = reactive(sum(superficies_tipos()))
+  output$total_superficie_unidades <- renderText(total_superficie_unidades())
   
   ### precio ----
   precios_m2_tipos <- reactive(
@@ -614,9 +633,18 @@ server <- function(input, output, session) {
   output$precios_tipos <- renderText(precios_tipos() |> uf())
   
   ingreso_deptos = reactive({
+    # browser()
     # if (input$castigo == FALSE) {
     sum(cantidades_tipos() * precios_tipos()) 
   })
+  
+  
+  # para gastos administrativos
+  ingreso_deptos_mercado = reactive({
+    # browser()
+    sum(cantidades_tipos_mercado() * precios_tipos()) 
+  })
+  
   output$ingreso_deptos <- renderText(ingreso_deptos() |> precio())
   
   
@@ -700,16 +728,39 @@ server <- function(input, output, session) {
   output$subtotal_terreno <- renderText(subtotal_terreno() |> uf())
   
   suma_superficies_totales = reactive(sum(superficies_tipos()))
-  suma_superficies_mercado = reactive(sum(ifelse(mercado_o_tramos() %in% c("Mercado", "Tramo 3"), superficies_tipos(), 0)))
+  suma_superficies_mercado = reactive(sum(ifelse(mercado_o_tramos() %in% c("Mercado"), superficies_tipos(), 0)))
   suma_superficies_tramo_1 = reactive(sum(ifelse(mercado_o_tramos() %in% c("Tramo 1"), superficies_tipos(), 0)))
   suma_superficies_tramo_2 = reactive(sum(ifelse(mercado_o_tramos() %in% c("Tramo 2"), superficies_tipos(), 0)))
-  suma_superficies_tramo_1y2 = reactive(sum(ifelse(mercado_o_tramos() %in% c("Tramo 1", "Tramo 2"), superficies_tipos(), 0)))
+  suma_superficies_tramo_3 = reactive(sum(ifelse(mercado_o_tramos() %in% c("Tramo 3"), superficies_tipos(), 0)))
+  
+  # suma_superficies_tramo_1y2 = reactive(sum(ifelse(mercado_o_tramos() %in% c("Tramo 1", "Tramo 2"), superficies_tipos(), 0)))
   output$suma_superficies_totales <- renderText(suma_superficies_totales() |> mt2())
   output$suma_superficies_mercado <- renderText(suma_superficies_mercado() |> mt2())
-  output$suma_superficies_tramo_1y2 <- renderText(suma_superficies_tramo_1y2() |> mt2())
+  # output$suma_superficies_tramo_1y2 <- renderText(suma_superficies_tramo_1y2() |> mt2())
   
-  total_costo_construccion_sobre_nt1 = reactive((input$costo_construccion_sobre_nt1 *  suma_superficies_mercado() / (1 -input$superficie_area_comun)))
-  total_costo_construccion_sobre_nt2 = reactive((input$costo_construccion_sobre_nt2 *  suma_superficies_tramo_1y2() / (1 -input$superficie_area_comun)))
+  ### costos construcción ----
+  # para tramo 1 y tramo 2, hay precios de venta distintos. la enterga de esos tramos es opbra gruesa habitable, por lo uqe el costo de cponstrucción es menor
+  # nt1 es terminación estándar, nt2 es obra gruesa
+  # costos terminación estándar
+  total_costo_construccion_sobre_nt1 = reactive({
+    # browser()
+    # 1677 + 2648 + 4560 
+    superficies = suma_superficies_mercado() + suma_superficies_tramo_3()
+    
+    superficies_totales = superficies + area_comun_proyecto() # areas comunes del edificio
+    
+    superficies_totales * input$costo_construccion_sobre_nt1
+      
+  })
+  
+  # costos obra gruesa
+  total_costo_construccion_sobre_nt2 = reactive({ 
+    # browser()
+    input$costo_construccion_sobre_nt2 *  
+      (sum(suma_superficies_tramo_1(),
+           suma_superficies_tramo_2())) 
+  })
+  
   output$total_costo_construccion_sobre_nt1 <- renderText(total_costo_construccion_sobre_nt1() |> uf())
   output$total_costo_construccion_sobre_nt2 <- renderText(total_costo_construccion_sobre_nt2() |> uf())
   
@@ -721,49 +772,60 @@ server <- function(input, output, session) {
   output$total_costo_urbanizacion_areaverde_exterior <- renderText(total_costo_urbanizacion_areaverde_exterior() |> uf())
   
   ### costo directo ----
-  subtotal_directo = reactive(
+  
+  # cantidad de unidades por 
+  # observe({
+  #   browser()
+  #   total_superficie_unidades() * area_comun_mt2()
+  #   
+  #   tramo 1 y tamo 2 * total_costo_construccion_sobre_nt1()
+  #   tramo 3 y vendible  total_costo_construccion_sobre_nt2
+  # })
+  
+  
+  
+  costo_directo = reactive({
+    # browser()
     sum(total_costo_construccion_sobre_nt1(),
-        total_costo_construccion_sobre_nt2(),
+        total_costo_construccion_sobre_nt2()) +
+      sum(
         total_costo_construccion_subterraneo(),
         total_costo_construccion_estacionamiento_exterior(),
-        total_costo_urbanizacion_areaverde_exterior())
-  )
-  output$subtotal_directo <- renderText(subtotal_directo() |> uf())
-  # # formula subtotal directo
-  # (E33 *
-  #     (L20/ 
-  #        ((100-L9)/100)-
-  #        (SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 2")+
-  #           (SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 1"))
-  #        )
-  #     ) +
-  #     (E34*SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 2")) +
-  #     (E34*SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 1") + (E35*L29) + (E36*L28) + (E39*E9)
-  #     )
-  #   )
-  # 
-  # (total_costo_construccion_sobre_nt1() *
-  #     (L20/ 
-  #        ((100-L9)/100)-
-  #        (SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 2")+
-  #           (SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 1"))
-  #        )
-  #     ) +
-  #     (E34*SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 2")) +
-  #     (E34*SUMAR.SI.CONJUNTO(L15:L19;G15:G19;"Tramo 1") + (E35*L29) + (E36*L28) + (E39*E9)
-  #     )
-  # )
+        total_costo_urbanizacion_areaverde_exterior() #urbanizacion
+      )
+  })
   
-  ## costo indirecto  ----
-  costo_proyecto = reactive((input$costo_proyecto_arquitectura + input$costo_proyecto_permisos) * subtotal_directo())
-  gastos_administrativos = reactive(total_ingreso() * sum(input$costo_proyecto_administrativo_comercialización, input$costo_proyecto_administrativo_publicidad, input$costo_proyecto_administrativo_administración))
+  # costo_directo_
+  output$costo_directo <- renderText(costo_directo() |> uf())
+  
+  
+  ### costo indirecto  ----
+  costo_proyecto = reactive({
+    # browser()
+    
+      # costo_directo()
+      (costo_directo() - total_costo_construccion_sobre_nt2()) * # descontarles tramo 1 y 2
+      (input$costo_proyecto_arquitectura + input$costo_proyecto_permisos)
+  })
+  # tramos 1 y 2 deberían ir con asistencia técnica del minvu, 
+  # por lo que se deberían descontar esas superficies de departamentos como costo de proyecto (especulación)
+  
+  gastos_administrativos = reactive({
+    # total_ingreso() * #dejar solo el ingreso de mercado (restar tramo 1, 2 y 3)
+    # browser()
+    gastos_administrativos <- sum(input$costo_proyecto_administrativo_comercialización, 
+                                  input$costo_proyecto_administrativo_publicidad, 
+                                  input$costo_proyecto_administrativo_administración)
+    
+    (ingreso_deptos_mercado() + ingreso_bodega_estacionamiento()) * gastos_administrativos
+  })
   # uno de estos dos está incorrecto
   
   # incorrecto en ev 1 y 2, correcto degún ev merc y ev proy
-  subtotal_indirecto = reactive(costo_proyecto() + gastos_administrativos()) # mayor en int1
+  costo_indirecto = reactive(costo_proyecto() + gastos_administrativos()) # mayor en int1
   
   # formula subtotal indirecto
-  # subtotal_indirecto = reactive({
+  # costo_indirecto = reactive({
   #   ((
   #     (
   #       (input$costo_proyecto_arquitectura + input$costo_proyecto_permisos) *
@@ -794,13 +856,13 @@ server <- function(input, output, session) {
   
   output$costo_proyecto <- renderText(costo_proyecto() |> uf())
   output$gastos_administrativos <- renderText(gastos_administrativos() |> uf())
-  output$subtotal_indirecto <- renderText(subtotal_indirecto() |> uf())
+  output$costo_indirecto <- renderText(costo_indirecto() |> uf())
   
   # costo total
   costo_total = reactive(
     sum(subtotal_terreno(), # ok int1
-        subtotal_directo(), # ok en int1
-        subtotal_indirecto() # mayor en int1
+        costo_directo(), # ok en int1
+        costo_indirecto() # mayor en int1
     )
   )
   output$costo_total <- renderText(costo_total() |> uf())
