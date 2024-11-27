@@ -37,9 +37,22 @@ porcentaje <- function(x, decimales = 0.01) {
 }
 
 
-explicacion <- function(texto) {
+explicacion <- function(texto, ...) {
   
-  div(style = css(font_size = "80%", font_style = "italic"),
+  div(style = css(font_size = "80%", font_style = "italic", ...),
       p(texto)
+  )
+}
+
+lista_tipos <- function(vector) {
+  
+  div(style = css(margin_top = "4px"),
+      map(1:5, ~{
+        cantidad <- vector[.x] |> mt2()
+        
+        div(style = css(font_size = "75%", margin_bottom = "0px"),
+            p(paste0("Tipo ", .x, ":"), cantidad)
+        )
+      })
   )
 }

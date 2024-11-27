@@ -1,4 +1,5 @@
 library(dplyr)
+library(purrr)
 library(shiny)
 library(bslib)
 library(htmltools)
@@ -39,6 +40,10 @@ ui <- page_fluid(
   ),
   
   tags$style(
+    HTML("h5 {margin-bottom: -20px;}")
+  ),
+  
+  tags$style(
     HTML(".alerta {background-color: #F3CECE !important;}")
   ),
   
@@ -60,48 +65,52 @@ ui <- page_fluid(
                   card_body(
                     
                     autonumericInput("sup_total_terreno",
-                                     label = "sup_total_terreno",
+                                     label = "Superficie total del terreno",
                                      align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s",
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 7281, step = 1),
                     
                     autonumericInput("faja_up_expropiacion",
-                                     label = "faja_up_expropiacion",
+                                     label = "Faja U.P. (expropiación)",
                                      align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s",
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 1634, step = 1),
                     
                     autonumericInput("faja_exterior_eje_ep",
-                                     label = "faja_exterior_eje_ep",
+                                     label = "Faja exterior a eje EP",
                                      align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s",
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 565, step = 1),
                     
                     autonumericInput("valor_suelo_uf",
-                                     label = "valor_suelo_uf",
+                                     label = "Valor de suelo de referencia",
                                      currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 14.5, step = 0.5)
-                  )),
+                  )
+                ),
                 
                 card(
                   card_header(
-                    # PRECIOS MÁXIMOS INTEGRACIÓN	
-                    h3("Precios integración")
-                  ),
+                    h3("Precios integración")),
+                  
                   card_body(
+                    
+                    em("Precio Venta Deptos Integración: Se consideran valores según llamado especial 2024 (Res. Excenta 385)"),
+                    
+                    
                     autonumericInput("precio_max_int_t1",
-                                     label = ".precio_max_int_t1",
+                                     label = "Tramo 1",
                                      currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 1400, step = 100),
                     autonumericInput("precio_max_int_t2",
-                                     label = ".precio_max_int_t2",
+                                     label = "Tramo 2",
                                      currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 1700, step = 100),
                     autonumericInput("precio_max_int_t3",
-                                     label = ".precio_max_int_t3",
+                                     label = "Tramo 3",
                                      currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
                                      decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                      value = 2250, step = 100),
@@ -110,22 +119,27 @@ ui <- page_fluid(
                     #             "calidad_ep",
                     #             min = 1, max = 4, value = 3,
                     #             width = "100%")
-                    sliderTextInput(
-                      inputId = "calidad_ep",
-                      label = "calidad_ep", 
-                      grid = TRUE,
-                      force_edges = TRUE,
-                      choices = c("Deficiente",
-                                  "Regular",
-                                  "Bueno",
-                                  "Muy bueno")
-                    ),
                     
-                    explicacion("La Calidad del Espacio Público se refiere al nivel de arborización, iluminación, veredas, paraderos y acceso a estaciones de metro, entre otros.")
                   )
                 )
               ),
               
+              card(
+                card_header(
+                  h4("Espacio público")),
+                sliderTextInput(
+                  inputId = "calidad_ep",
+                  label = "Calidad del espacio público", 
+                  grid = TRUE,
+                  force_edges = TRUE,
+                  choices = c("Deficiente",
+                              "Regular",
+                              "Bueno",
+                              "Muy bueno")
+                ),
+                
+                explicacion("La Calidad del Espacio Público se refiere al nivel de arborización, iluminación, veredas, paraderos y acceso a estaciones de metro, entre otros.")
+              ),
               
               
               card(
@@ -144,11 +158,13 @@ ui <- page_fluid(
                     div(
                       numericInput("normativa_densidad",
                                    NULL,
-                                   value = 1500, step = 100),
+                                   value = 1500, step = 100) |> 
+                        tooltip("Incremento en Densidad: Indicar si corresponde incremento según art. 6.1.8 de OGUC (C. Vivienda Económica)"),
                       
                       numericInput("normativa_construccion",
                                    label = "Coeficiente de Constructibilidad permitido (actual)",
-                                   value = 3.2, step = 0.1)
+                                   value = 3.2, step = 0.1) |> 
+                        tooltip("Incremento en constructibilidad: Indicar si corrende incremento según art. 63 de LGUC (fusión predial) y art. 2.6.5, 2.6.6 y 2.6.7 de OGUC (C. Armónico)")
                     ),
                     
                     div(
@@ -156,14 +172,20 @@ ui <- page_fluid(
                                   NULL, 
                                   choices = c("hab/ha", "viv/ha")),
                       
+                      div(style = css(margin_bottom = "12px"),
+                          explicacion("Unidad de Medida Densidad: Indicar valor en hab/há o su equivalente en viv/há.")
+                      ),
+                      
                       autonumericInput("superficie_area_comun",
                                        currencySymbol = "%", currencySymbolPlacement = "s",
                                        "superficie_area_comun",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
-                      ),
+                      ) |> 
+                        tooltip("Area Común: Se considera un superficie en torno al 15% de la superficie máxima construible"),
                       
                       explicacion("Porcentaje del área construida que se destina a espacios no vendibles, como pasillos, corredores, etc.")
+                      
                     )
                   ),
                   
@@ -171,21 +193,30 @@ ui <- page_fluid(
                   div(
                     hr(),
                     h4("Cabida"),
+                    
+                    br(),
+                    h5("Superficie terreno"),
                     cifra("sup_total_terreno:", textOutput("sup_total_terreno")),
                     # neta
                     cifra("superficie_neta:", textOutput("superficie_neta")),
                     
+                    br(),
+                    h5("Superficie neta p/desarrollo"),
                     cifra("superficie_max_util_const:", textOutput("superficie_max_util_const")),
                     cifra("area_comun_mt2:", textOutput("area_comun_mt2")),
-                    cifra("max_unidades_vendibles:", textOutput("max_unidades_vendibles")),
-                    cifra("max_superficie_vendible:", textOutput("max_superficie_vendible")),
+                    
+                    br(),
+                    h5("Máximos vendibles"),
+                    cifra("Máximo de unidades vendibles:", textOutput("max_unidades_vendibles")),
+                    cifra("Sup. Máxima Vendible:", textOutput("max_superficie_vendible")),
+                    explicacion("Valor resultante de la resta entre la sup. máxima construible y el área común", margin_top = "-4px", margin_left = "3px"),
                     
                     hr(),
                     # norma aplicada
                     h4("Norma aplicada"),
-                    cifra("normativa_densidad:", textOutput("normativa_densidad")),
+                    cifra("Densidad:", textOutput("normativa_densidad")),
                     
-                    cifra("normativa_construccion:", textOutput("normativa_construccion")),
+                    cifra("Construcción:", textOutput("normativa_construccion")),
                   )
                 )
               ), 
@@ -261,329 +292,365 @@ ui <- page_fluid(
               ) |> tooltip("Cambiar escenario para establecer inputs predefinidos"),
               
               actionButton("flotante", label = "Mostrar resultados flotantes"),
-    
-    hr(),
-    
-    div(
-      
-      
-      
-      ## ingresos ----
-      div(
-        
-        layout_columns(
-          col_widths = c(7, 5),
-          
-          div(
-            
-            card(
-              card_header(
-                h3("Ingresos")
-              ),
               
-              card_body(id = "panel_ingresos",
-                layout_columns(
-                  col_widths = c(3, 4, 2, 3),
-                  
-                  div(
-                    em("Tamaños"),
-                    autonumericInput("tamaño_tipo_s1", label = NULL, value = 38, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("tamaño_tipo_s2", label = NULL, value = 45, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("tamaño_tipo_s3", label = NULL, value = 52, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("tamaño_tipo_s4", label = NULL, value = 55, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("tamaño_tipo_s5", label = NULL, value = 62, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    
-                  ),
-                  div(
-                    em("Tramos"),
-                    selectInput("tramo_s1", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
-                    selectInput("tramo_s2", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
-                    selectInput("tramo_s3", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
-                    selectInput("tramo_s4", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
-                    selectInput("tramo_s5", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%")
-                  ),
-                  div(
-                    em("%"),
-                    autonumericInput("porcentaje_s1", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                    autonumericInput("porcentaje_s2", label = NULL, value = 0.20*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                    autonumericInput("porcentaje_s3", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                    autonumericInput("porcentaje_s4", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                    autonumericInput("porcentaje_s5", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                    
-                  ),
-                  div(
-                    em("UF/mt²"),
-                    autonumericInput("precios_m2_tipos_s1", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("precios_m2_tipos_s2", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("precios_m2_tipos_s3", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("precios_m2_tipos_s4", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    autonumericInput("precios_m2_tipos_s5", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
-                    
-                  )
-                )
-              )
-            ),
-            
-          ),
-          
-          div(
-            card(
-              card_body(
-                cifra("cantidades_tipos", textOutput("cantidades_tipos")),
-                cifra("total_cantidad_unidades", textOutput("total_cantidad_unidades")),
-                cifra("superficies_tipos", textOutput("superficies_tipos")),
-                cifra("total_superficie_unidades", textOutput("total_superficie_unidades")),
-                cifra("precios_tipos", textOutput("precios_tipos")),
-                cifra("ingreso_deptos", textOutput("ingreso_deptos"))
-              )
-            )
-          )
-        )
-      ),
-      
-      
-      
-      ### estacionamientos ----
-      card(
-        card_header(  
-          h3("Estacionamientos")),
-        card_body(
-          layout_columns(
-            col_widths = c(7, 5),
-            div(
-              autonumericInput("dotacion_est_viv_menor_50m2",
-                           "dotacion_est_viv_menor_50m2",
-                           currencySymbol = " un/viv", currencySymbolPlacement = "s",
-                           0.33, step = 0.1),
-              numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
-                           "dotacion_est_viv_sobre_50m2_menor_100m2",
-                           0.5, step = 0.1),
-              numericInput("dotacion_est_rebaja",
-                           "dotacion_est_rebaja",
-                           0, step = 0.5),
-              numericInput("dotacion_est_viv_social",
-                           "dotacion_est_viv_social",
-                           0, step = 0.5),
+              hr(),
               
-              # total estacionamientos
-              numericInput("estacionamiento_subterraneo",
-                           "estacionamiento_subterraneo",
-                           0.50, step = 0.05),
-              numericInput("estacionamiento_exterior",
-                           "estacionamiento_exterior",
-                           0.50, step = 0.05),
-              numericInput("estacionamiento_visita",
-                           "estacionamiento_visita",
-                           0.15, step = 0.05)
-            ),
-            
-            div(style = css(padding_top = "16px"),
-                cifra("total_estac_viv_menor_50m2", textOutput("total_estac_viv_menor_50m2")),
-                cifra("total_estac_viv_sobre_50m2_menor_100m2", textOutput("total_estac_viv_sobre_50m2_menor_100m2")),
-                cifra("total_estac_viv_social", textOutput("total_estac_viv_social")),
-                cifra("total_estacionamientos", textOutput("total_estacionamientos")),
-                cifra("total_estacionamientos_vendibles", textOutput("total_estacionamientos_vendibles")),
-            )
-          )
-        )
-      ),
-      
-      
-      ### bodegas ----
-      card(
-        card_header(h3("Bodegas")),
-        card_body(
-          layout_columns(
-            col_widths = c(7, 5),
-            div(
-              numericInput("bodega_dotacion", 
-                           "bodega_dotacion", 
-                           1, step = 0.5),
-              numericInput("precio_estacionamiento_subterraneo", 
-                           "precio_estacionamiento_subterraneo", 
-                           250, step = 5),
-              numericInput("precio_estacionamiento_exterior", 
-                           "precio_estacionamiento_exterior", 
-                           150, step = 5),
-              numericInput("precio_bodega", 
-                           "precio_bodega", 
-                           80, step = 5)
-            ),
-            div(
-              style = css(padding_top = "16px"),
-              cifra("total_bodegas", textOutput("total_bodegas")),
-              cifra("superficie_exterior", textOutput("superficie_exterior")),
-              cifra("superficie_subterranea", textOutput("superficie_subterranea")),
-              cifra("ingreso_bodega_estacionamiento", textOutput("ingreso_bodega_estacionamiento")),
-            )
-          )
-        )
-      ),
-      
-      
-      
-      # total ingresos
-      card(
-        cifra("total_ingreso", textOutput("total_ingreso"))
-      ),
-      
-      
-      
-      ## costos ----
-      
-      card(
-        card_header(
-          h3("Costos")
-        ),
-        card_body(
-          layout_columns(
-            col_widths = c(6, 6),
-            
-            div(
-              numericInput("costo_construccion_sobre_nt1",
-                           "costo_construccion_sobre_nt1",
-                           24, step = 1),
-              numericInput("costo_construccion_sobre_nt2",
-                           "costo_construccion_sobre_nt2",
-                           18, step = 1),
-              numericInput("costo_construccion_subterraneo",
-                           "costo_construccion_subterraneo",
-                           14, step = 1),
-              numericInput("costo_construccion_estacionamiento_exterior",
-                           "costo_construccion_estacionamiento_exterior",
-                           5.0, step = 1),
-              
-              # costo urbanizacion
-              numericInput("costo_urbanizacion_areaverde_exterior",
-                           "costo_urbanizacion_areaverde_exterior",
-                           2.0, step = 1),
-              
-              ### costos proyecto
-              numericInput("costo_proyecto_arquitectura",
-                           "costo_proyecto_arquitectura",
-                           0.020, step = 0.01),
-              numericInput("costo_proyecto_permisos",
-                           "costo_proyecto_permisos",
-                           0.025, step = 0.01),
-              
-              # gastos administrativos
-              numericInput("costo_proyecto_administrativo_comercialización",
-                           "costo_proyecto_administrativo_comercialización",
-                           0.025, step = 0.01),
-              numericInput("costo_proyecto_administrativo_publicidad",
-                           "costo_proyecto_administrativo_publicidad",
-                           0.040, step = 0.01),
-              numericInput("costo_proyecto_administrativo_administración",
-                           "costo_proyecto_administrativo_administración",
-                           0.035, step = 0.01)
-              
-            ),
-            
-            div(style = css(padding_top = "16px"),
+              div(
                 
-                cifra("subtotal_terreno:", textOutput("subtotal_terreno")),
                 
-                br(),
-                cifra("suma_superficies_totales:", textOutput("suma_superficies_totales")),
-                cifra("suma_superficies_mercado:", textOutput("suma_superficies_mercado")),
-                # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
                 
-                br(),
-                cifra("total_costo_construccion_sobre_nt1:", textOutput("total_costo_construccion_sobre_nt1")),
-                cifra("total_costo_construccion_sobre_nt2:", textOutput("total_costo_construccion_sobre_nt2")),
-                br(),
-                cifra("total_costo_construccion_subterraneo:", textOutput("total_costo_construccion_subterraneo")),
-                cifra("total_costo_construccion_estacionamiento_exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
-                cifra("total_costo_urbanizacion_areaverde_exterior:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
-                
-                br(),
-                cifra("costo_proyecto:", textOutput("costo_proyecto")),
-                cifra("gastos_administrativos:", textOutput("gastos_administrativos")),
-                br(),
-                cifra("costo_directo:", textOutput("costo_directo")),
-                cifra("costo_indirecto:", textOutput("costo_indirecto")),
-                br(),
-                cifra("costo_total:", textOutput("costo_total")),      
-            )
-          )
-        )
-      ),
-      
-      ## compensación ----
-      div(id = "panel_compensacion",
-          card(
-            card_header(
-              h4("Compensación")
-            ),
-            autonumericInput("compensacion_densidad",
-                             label = "compensacion_densidad (%)",
-                             currencySymbol = "%", currencySymbolPlacement = "s",
-                             decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                             value = 0, min = 0),
-            
-            autonumericInput("compensacion_construccion",
-                             label = "compensacion_construccion (%)",
-                             currencySymbol = "%", currencySymbolPlacement = "s",
-                             decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                             value = 0, min = 0)
-          )
-          # autonumericInput("superficie_area_comun",
-          #                  currencySymbol = "%", currencySymbolPlacement = "s",
-          #                  "superficie_area_comun",
-          #                  decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-          #                  value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
-          # ),
-      ) |> hidden(),
-      
-      ## castigo ----
-      div(id = "panel_castigo",
-          card(
-            card_header(
-              h3("Castigo")
-            ),
-            card_body(
-              layout_columns(
-                col_widths = c(6, 6),
-                
+                ## ingresos ----
                 div(
-                  cifra("p_integracion:", textOutput("p_integracion")),
-                  cifra("p_castigo:", textOutput("p_castigo"))
+                  
+                  layout_columns(
+                    col_widths = c(8, 4),
+                    
+                    div(
+                      
+                      card(
+                        card_header(
+                          h3("Ingresos")
+                        ),
+                        
+                        card_body(id = "panel_ingresos",
+                                  em("Cada fila de inputs corresponde a un tipo de vivienda"),
+                                  layout_columns(
+                                    col_widths = c(3, 4, 2, 3),
+                                    
+                                    
+                                    # div(em("Tipos"),
+                                    #     em("Tipo 1"),
+                                    #     em("Tipo 2"),
+                                    #     em("Tipo 3"),
+                                    #     em("Tipo 4"),
+                                    #     em("Tipo 5"),
+                                    # ),
+                                    
+                                    div(
+                                      em("Tamaños"),
+                                      autonumericInput("tamaño_tipo_s1", label = NULL, value = 38, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("tamaño_tipo_s2", label = NULL, value = 45, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("tamaño_tipo_s3", label = NULL, value = 52, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("tamaño_tipo_s4", label = NULL, value = 55, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("tamaño_tipo_s5", label = NULL, value = 62, step = 1, width = "100%", align = "left", currencySymbol = " mt²", currencySymbolPlacement = "s", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      
+                                    ),
+                                    div(
+                                      em("Tramos"),
+                                      selectInput("tramo_s1", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
+                                      selectInput("tramo_s2", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
+                                      selectInput("tramo_s3", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
+                                      selectInput("tramo_s4", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%"),
+                                      selectInput("tramo_s5", label = NULL, selected = "Mercado", choices = lista_tramos, width = "100%")
+                                    ),
+                                    div(
+                                      em("%"),
+                                      autonumericInput("porcentaje_s1", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                      autonumericInput("porcentaje_s2", label = NULL, value = 0.20*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                      autonumericInput("porcentaje_s3", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                      autonumericInput("porcentaje_s4", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                      autonumericInput("porcentaje_s5", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                      
+                                    ),
+                                    div(
+                                      em("UF/mt²"),
+                                      autonumericInput("precios_m2_tipos_s1", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("precios_m2_tipos_s2", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("precios_m2_tipos_s3", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("precios_m2_tipos_s4", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      autonumericInput("precios_m2_tipos_s5", label = NULL, value = 50, step = 5, min = 0, width = "100%", currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0),
+                                      
+                                    )
+                                  )
+                        )
+                      ),
+                      
+                    ),
+                    
+                    div(
+                      card(
+                        card_body(
+                          h5("Unidades"),
+                          p("Cantidad total de unidades:", textOutput("total_cantidad_unidades", inline = TRUE)),
+                          div(style = css(margin_top = "-20px"),
+                              uiOutput("cantidades_tipos")
+                          ),
+                          
+                          h5("Superficie"),
+                          p("Superficie total de unidades", textOutput("total_superficie_unidades", inline = T)),
+                          div(style = css(margin_top = "-20px"),
+                              uiOutput("superficies_tipos")
+                          ),
+
+                          h5("Ingresos"),
+                          p("Ingreso total de unidades", textOutput("ingreso_deptos", inline = T)),
+                          div(style = css(margin_top = "-20px"),
+                              uiOutput("precios_tipos")
+                          ),
+                          
+                          
+                          
+                          
+                          
+                          
+                        )
+                      )
+                    )
+                  )
+                ),
+                
+                
+                
+                ### estacionamientos ----
+                card(
+                  card_header(  
+                    h3("Estacionamientos")),
+                  card_body(
+                    layout_columns(
+                      col_widths = c(7, 5),
+                      div(
+                        autonumericInput("dotacion_est_viv_menor_50m2",
+                                         "dotacion_est_viv_menor_50m2",
+                                         currencySymbol = " un/viv", currencySymbolPlacement = "s",
+                                         0.33, step = 0.1),
+                        numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
+                                     "dotacion_est_viv_sobre_50m2_menor_100m2",
+                                     0.5, step = 0.1),
+                        numericInput("dotacion_est_rebaja",
+                                     "dotacion_est_rebaja",
+                                     0, step = 0.5),
+                        numericInput("dotacion_est_viv_social",
+                                     "dotacion_est_viv_social",
+                                     0, step = 0.5),
+                        
+                        # total estacionamientos
+                        numericInput("estacionamiento_subterraneo",
+                                     "estacionamiento_subterraneo",
+                                     0.50, step = 0.05),
+                        numericInput("estacionamiento_exterior",
+                                     "estacionamiento_exterior",
+                                     0.50, step = 0.05),
+                        numericInput("estacionamiento_visita",
+                                     "estacionamiento_visita",
+                                     0.15, step = 0.05)
+                      ),
+                      
+                      div(style = css(padding_top = "16px"),
+                          
+                          em("Dotación Estacionam.: Considera dotación para viviendas menores a 100m2 según PRMS y para viviendas de familias vulnerables según Ley de Copropiedad y Ley de Integración Social."),
+                          
+                          cifra("total_estac_viv_menor_50m2", textOutput("total_estac_viv_menor_50m2")),
+                          cifra("total_estac_viv_sobre_50m2_menor_100m2", textOutput("total_estac_viv_sobre_50m2_menor_100m2")),
+                          cifra("total_estac_viv_social", textOutput("total_estac_viv_social")),
+                          cifra("total_estacionamientos", textOutput("total_estacionamientos")),
+                          cifra("total_estacionamientos_vendibles", textOutput("total_estacionamientos_vendibles")),
+                      )
+                    )
+                  )
+                ),
+                
+                
+                ### bodegas ----
+                card(
+                  card_header(h3("Bodegas")),
+                  card_body(
+                    layout_columns(
+                      col_widths = c(7, 5),
+                      div(
+                        numericInput("bodega_dotacion", 
+                                     "bodega_dotacion", 
+                                     1, step = 0.5),
+                        numericInput("precio_estacionamiento_subterraneo", 
+                                     "precio_estacionamiento_subterraneo", 
+                                     250, step = 5),
+                        numericInput("precio_estacionamiento_exterior", 
+                                     "precio_estacionamiento_exterior", 
+                                     150, step = 5),
+                        numericInput("precio_bodega", 
+                                     "precio_bodega", 
+                                     80, step = 5)
+                      ),
+                      div(
+                        style = css(padding_top = "16px"),
+                        cifra("total_bodegas", textOutput("total_bodegas")),
+                        cifra("superficie_exterior", textOutput("superficie_exterior")),
+                        cifra("superficie_subterranea", textOutput("superficie_subterranea")),
+                        cifra("ingreso_bodega_estacionamiento", textOutput("ingreso_bodega_estacionamiento")),
+                      )
+                    )
+                  )
+                ),
+                
+                
+                
+                # total ingresos
+                card(
+                  cifra("total_ingreso", textOutput("total_ingreso"))
+                ),
+                
+                
+                
+                ## costos ----
+                
+                card(
+                  card_header(
+                    h3("Costos")
+                  ),
+                  card_body(
+                    layout_columns(
+                      col_widths = c(6, 6),
+                      
+                      div(
+                        numericInput("costo_construccion_sobre_nt1",
+                                     "costo_construccion_sobre_nt1",
+                                     24, step = 1),
+                        numericInput("costo_construccion_sobre_nt2",
+                                     "costo_construccion_sobre_nt2",
+                                     18, step = 1),
+                        numericInput("costo_construccion_subterraneo",
+                                     "costo_construccion_subterraneo",
+                                     14, step = 1),
+                        numericInput("costo_construccion_estacionamiento_exterior",
+                                     "costo_construccion_estacionamiento_exterior",
+                                     5.0, step = 1),
+                        
+                        # costo urbanizacion
+                        numericInput("costo_urbanizacion_areaverde_exterior",
+                                     "costo_urbanizacion_areaverde_exterior",
+                                     2.0, step = 1),
+                        
+                        ### costos proyecto
+                        numericInput("costo_proyecto_arquitectura",
+                                     "costo_proyecto_arquitectura",
+                                     0.020, step = 0.01),
+                        numericInput("costo_proyecto_permisos",
+                                     "costo_proyecto_permisos",
+                                     0.025, step = 0.01),
+                        
+                        # gastos administrativos
+                        numericInput("costo_proyecto_administrativo_comercialización",
+                                     "costo_proyecto_administrativo_comercialización",
+                                     0.025, step = 0.01),
+                        numericInput("costo_proyecto_administrativo_publicidad",
+                                     "costo_proyecto_administrativo_publicidad",
+                                     0.040, step = 0.01),
+                        numericInput("costo_proyecto_administrativo_administración",
+                                     "costo_proyecto_administrativo_administración",
+                                     0.035, step = 0.01)
+                        
+                      ),
+                      
+                      div(style = css(padding_top = "16px"),
+                          
+                          h4("Costos de construcción"),
+                          br(),
+                          cifra("suma_superficies_totales:", textOutput("suma_superficies_totales")),
+                          cifra("suma_superficies_mercado:", textOutput("suma_superficies_mercado")),
+                          # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
+                          
+                          br(),
+                          cifra("total_costo_construccion_sobre_nt1:", textOutput("total_costo_construccion_sobre_nt1")),
+                          cifra("total_costo_construccion_sobre_nt2:", textOutput("total_costo_construccion_sobre_nt2")),
+                          br(),
+                          cifra("total_costo_construccion_subterraneo:", textOutput("total_costo_construccion_subterraneo")),
+                          cifra("total_costo_construccion_estacionamiento_exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
+                          cifra("total_costo_urbanizacion_areaverde_exterior:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
+                          
+                          br(),
+                          cifra("costo_proyecto:", textOutput("costo_proyecto")),
+                          cifra("gastos_administrativos:", textOutput("gastos_administrativos")),
+                          
+                          hr(),
+                          
+                          h4("Subtotales"),
+                          cifra("Subtotal terreno:", textOutput("subtotal_terreno")),
+                          
+                          cifra("Costo directo:", textOutput("costo_directo")),
+                          explicacion("Considera suma de costo de construcción y costo de urbanización", margin_top = "-4px", margin_left = "4px"),
+                          cifra("Costo indirecto:", textOutput("costo_indirecto")),
+                          explicacion("Considera suma de costo proyecto y gastos administrativos (inmobiliarios)", margin_top = "-4px", margin_left = "4px"),
+                          br(),
+                          cifra("Costo total:", textOutput("costo_total")),      
+                      )
+                    )
+                  )
+                ),
+                
+                ## compensación ----
+                div(id = "panel_compensacion",
+                    card(
+                      card_header(
+                        h4("Compensación")
+                      ),
+                      autonumericInput("compensacion_densidad",
+                                       label = "compensacion_densidad (%)",
+                                       currencySymbol = "%", currencySymbolPlacement = "s",
+                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                                       value = 0, min = 0),
+                      
+                      autonumericInput("compensacion_construccion",
+                                       label = "compensacion_construccion (%)",
+                                       currencySymbol = "%", currencySymbolPlacement = "s",
+                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                                       value = 0, min = 0)
+                    )
+                    # autonumericInput("superficie_area_comun",
+                    #                  currencySymbol = "%", currencySymbolPlacement = "s",
+                    #                  "superficie_area_comun",
+                    #                  decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                    #                  value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
+                    # ),
+                ) |> hidden(),
+                
+                ## castigo ----
+                div(id = "panel_castigo",
+                    card(
+                      card_header(
+                        h3("Castigo")
+                      ),
+                      card_body(
+                        layout_columns(
+                          col_widths = c(6, 6),
+                          
+                          div(
+                            cifra("p_integracion:", textOutput("p_integracion")),
+                            cifra("p_castigo:", textOutput("p_castigo"))
+                          )
+                        )
+                      )
+                    )
+                ),
+                
+                ## rentabilidad ----
+                # flotante
+                # fluidRow(
+                # column(12,
+                div(id = "panel_flotante",
+                    style = css(position = "fixed",
+                                bottom = "12px", right = "12px"),
+                    div(style = css(padding = "18px",
+                                    background_color = color$detalle,
+                                    border = paste("3px solid", color$fondo),
+                                    border_radius = "10px"),
+                        uiOutput("resultados_rentabilidad"),
+                    )
+                ) |> hidden(),
+                # )
+                # ) |> hidden(),
+                
+                # estática
+                card(
+                  card_header(h3("Rentabilidad")),
+                  card_body(
+                    
+                    uiOutput("resultados_rentabilidad_2"),
+                    br()
+                  )
+                  
                 )
               )
-            )
-          )
-      ),
-      
-      ## rentabilidad ----
-      # flotante
-      # fluidRow(
-      # column(12,
-      div(id = "panel_flotante",
-          style = css(position = "fixed",
-                      bottom = "12px", right = "12px"),
-          div(style = css(padding = "18px",
-                          background_color = color$detalle,
-                          border = paste("3px solid", color$fondo),
-                          border_radius = "10px"),
-              uiOutput("resultados_rentabilidad"),
-          )
-      ) |> hidden(),
-      # )
-      # ) |> hidden(),
-      
-      # estática
-      card(
-        card_header(h3("Rentabilidad")),
-        card_body(
-          
-          uiOutput("resultados_rentabilidad_2"),
-          br()
-        )
-        
-      )
     )
   )
-)
 )
 
 
@@ -826,7 +893,10 @@ server <- function(input, output, session) {
   )
   
   cantidades_tipos = reactive(max_unidades_vendibles() * porcentaje_tipos())
-  output$cantidades_tipos <- renderText(cantidades_tipos() |> round())
+  output$cantidades_tipos <- renderUI({
+    cantidades_tipos() |> lista_tipos()
+        
+  })
   
   cantidades_tipos_mercado = reactive(ifelse(mercado_o_tramos() == "Mercado", cantidades_tipos(), 0)) # se usa para gastos administrativos
   
@@ -835,7 +905,10 @@ server <- function(input, output, session) {
   
   # superficie por tipo (mt2)
   superficies_tipos = reactive(cantidades_tipos() * tamaños_tipos())
-  output$superficies_tipos <- renderText(superficies_tipos() |> mt2())
+  output$superficies_tipos <- renderUI({
+    superficies_tipos() |> lista_tipos()
+  })
+  
   
   total_superficie_unidades = reactive(sum(superficies_tipos()))
   output$total_superficie_unidades <- renderText(total_superficie_unidades() |> mt2())
@@ -863,7 +936,9 @@ server <- function(input, output, session) {
     return(precios)
   })
   
-  output$precios_tipos <- renderText(precios_tipos() |> uf())
+  output$precios_tipos <- renderUI({
+    precios_tipos() |> lista_tipos()
+  })
   
   ingreso_deptos = reactive({
     # browser()
@@ -1168,7 +1243,7 @@ server <- function(input, output, session) {
       # updateAutonumericInput(session = session, options = 
     } else {
       removeClass(id = "panel_ingresos",
-               class = "alerta")
+                  class = "alerta")
     }
   })
   
