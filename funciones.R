@@ -35,3 +35,11 @@ mt2 <- function(x) {
 porcentaje <- function(x, decimales = 0.01) {
   scales::percent(x, decimales)
 }
+
+
+explicacion <- function(texto) {
+  
+  div(style = css(font_size = "80%", font_style = "italic"),
+      p(texto)
+  )
+}
