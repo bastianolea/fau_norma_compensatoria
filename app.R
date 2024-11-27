@@ -38,6 +38,10 @@ ui <- page_fluid(
           h3 {margin-top: 6px;}")
   ),
   
+  tags$style(
+    HTML(".alerta {background-color: #F3CECE !important;}")
+  ),
+  
   div(style = css(height = "12px")),
   
   navset_card_tab(
@@ -277,7 +281,7 @@ ui <- page_fluid(
                 h3("Ingresos")
               ),
               
-              card_body(
+              card_body(id = "panel_ingresos",
                 layout_columns(
                   col_widths = c(3, 4, 2, 3),
                   
@@ -347,8 +351,9 @@ ui <- page_fluid(
           layout_columns(
             col_widths = c(7, 5),
             div(
-              numericInput("dotacion_est_viv_menor_50m2",
+              autonumericInput("dotacion_est_viv_menor_50m2",
                            "dotacion_est_viv_menor_50m2",
+                           currencySymbol = " un/viv", currencySymbolPlacement = "s",
                            0.33, step = 0.1),
               numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
                            "dotacion_est_viv_sobre_50m2_menor_100m2",
@@ -588,6 +593,33 @@ server <- function(input, output, session) {
   
   # observadores ----
   
+  # la cantidad todal de unidades no puede superar el maximo vencible de unidades vendibles
+  # total_cantidad_unidades
+  # max_unidades_vendibles
+  observe({
+    req(input$total_cantidad_unidades)
+    req(input$max_unidades_vendibles)
+    
+    if (input$total_cantidad_unidades > input$max_unidades_vendibles) {
+      showNotification(session = session,
+                       "La cantidad total de unidades no puede superar el máximo de unidades vendibles",
+                       type = "error")
+    }
+  })
+  
+  # 
+  # # lo mismo con la superficie total y le maximo de superficie vencible
+  observe({
+    req(input$sup_total_terreno)
+    req(input$max_superficie_vendible)
+    
+    if (input$sup_total_terreno > input$max_superficie_vendible) {
+      showNotification("La cantidad total de unidades no puede superar el máximo de unidades vendibles",
+                       type = "error")
+    }
+  })
+  
+  
   # mostrar/ocultar panel flotante de resultados
   observeEvent(input$flotante, {
     toggle("panel_flotante")
@@ -717,7 +749,6 @@ server <- function(input, output, session) {
   output$p_integracion <- renderText(p_integracion() |> porcentaje())
   output$p_castigo <- renderText(p_castigo() |> porcentaje())
   
-  # —----
   
   ## cabida ----
   output$sup_total_terreno <- renderText(input$sup_total_terreno |> mt2())
@@ -742,7 +773,8 @@ server <- function(input, output, session) {
   
   
   # area común teórica
-  area_comun_mt2 = reactive(total_superficie_unidades() * (input$superficie_area_comun)/100)
+  area_comun_mt2 = reactive(
+    total_superficie_unidades() * (input$superficie_area_comun/100))
   
   superficie_total_proyecto = reactive(total_superficie_unidades()/0.85)
   
@@ -806,7 +838,7 @@ server <- function(input, output, session) {
   output$superficies_tipos <- renderText(superficies_tipos() |> mt2())
   
   total_superficie_unidades = reactive(sum(superficies_tipos()))
-  output$total_superficie_unidades <- renderText(total_superficie_unidades())
+  output$total_superficie_unidades <- renderText(total_superficie_unidades() |> mt2())
   
   ### precio ----
   precios_m2_tipos <- reactive(
@@ -1130,6 +1162,13 @@ server <- function(input, output, session) {
   observeEvent(porcentaje_tipos(), {
     if (sum(porcentaje_tipos()) > 1) {
       showNotification(glue("Los porcentajes no pueden sumar más de 100%"), type = "error")
+      
+      addClass(id = "panel_ingresos",
+               class = "alerta")
+      # updateAutonumericInput(session = session, options = 
+    } else {
+      removeClass(id = "panel_ingresos",
+               class = "alerta")
     }
   })
   
