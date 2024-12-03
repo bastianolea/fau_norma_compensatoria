@@ -439,43 +439,54 @@ ui <- page_fluid(
                       col_widths = c(7, 5),
                       div(
                         autonumericInput("dotacion_est_viv_menor_50m2",
-                                         "dotacion_est_viv_menor_50m2",
+                                         "Dotación de estacionamientos para viv. menores a 50m²",
                                          currencySymbol = " un/viv", currencySymbolPlacement = "s",
                                          0.33, step = 0.1),
                         numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
-                                     "dotacion_est_viv_sobre_50m2_menor_100m2",
+                                     "Dotación de estacionamientos para viv. sobre 50m² y menores a 100m²",
                                      0.5, step = 0.1),
                         numericInput("dotacion_est_rebaja",
                                      "dotacion_est_rebaja",
                                      0, step = 0.5),
                         numericInput("dotacion_est_viv_social",
-                                     "dotacion_est_viv_social",
+                                     "Dotación de estacionamientos por vivienda social",
                                      0, step = 0.5),
                         
                         # total estacionamientos
                         numericInput("estacionamiento_subterraneo",
-                                     "estacionamiento_subterraneo",
+                                     "Estacionamiento subterraneo p/unid.",
                                      0.50, step = 0.05),
                         numericInput("estacionamiento_exterior",
-                                     "estacionamiento_exterior",
+                                     "Estacionamiento exterior p/unid.",
                                      0.50, step = 0.05),
                         numericInput("estacionamiento_visita",
-                                     "estacionamiento_visita",
+                                     "Estacionamiento visita p/unid.",
                                      0.15, step = 0.05)
                       ),
                       
                       div(
-                        numericInput("precio_estacionamiento_subterraneo", 
-                                     "precio_estacionamiento_subterraneo", 
-                                     250, step = 5),
-                        numericInput("precio_estacionamiento_exterior", 
-                                     "precio_estacionamiento_exterior", 
-                                     150, step = 5)
+                        # numericInput("precio_estacionamiento_subterraneo", 
+                        #              "precio_estacionamiento_subterraneo", 
+                        #              250, step = 5),
+                        # numericInput("precio_estacionamiento_exterior", 
+                        #              "precio_estacionamiento_exterior", 
+                        #              150, step = 5)
+                        autonumericInput("precio_estacionamiento_subterraneo",
+                                         label = "Precio de estacionamiento subterráneo",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 250, step = 5),
+                        autonumericInput("precio_estacionamiento_exterior",
+                                         label = "Precio de estacionamiento exterior",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 150, step = 5)
                       ),
                       
                       div(style = css(padding_top = "16px"),
                           
                           em("Dotación Estacionam.: Considera dotación para viviendas menores a 100m2 según PRMS y para viviendas de familias vulnerables según Ley de Copropiedad y Ley de Integración Social."),
+                          br(),
                           br(),
                           cifra("total_estac_viv_menor_50m2", textOutput("total_estac_viv_menor_50m2")),
                           cifra("total_estac_viv_sobre_50m2_menor_100m2", textOutput("total_estac_viv_sobre_50m2_menor_100m2")),
@@ -496,11 +507,16 @@ ui <- page_fluid(
                       col_widths = c(7, 5),
                       div(
                         numericInput("bodega_dotacion", 
-                                     "bodega_dotacion", 
+                                     "Dotación de bodegas", 
                                      1, step = 0.5),
-                        numericInput("precio_bodega", 
-                                     "precio_bodega", 
-                                     80, step = 5)
+                        # numericInput("precio_bodega", 
+                        #              "Precio por bodega", 
+                        #              80, step = 5)
+                        autonumericInput("precio_bodega",
+                                         label = "Precio por bodega",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 80, step = 5),
                       ),
                       div(
                         style = css(padding_top = "16px"),
@@ -534,23 +550,48 @@ ui <- page_fluid(
                       col_widths = c(6, 6),
                       
                       div(
-                        numericInput("costo_construccion_sobre_nt1",
-                                     "costo_construccion_sobre_nt1",
-                                     24, step = 1),
-                        numericInput("costo_construccion_sobre_nt2",
-                                     "costo_construccion_sobre_nt2",
-                                     18, step = 1),
-                        numericInput("costo_construccion_subterraneo",
-                                     "costo_construccion_subterraneo",
-                                     14, step = 1),
-                        numericInput("costo_construccion_estacionamiento_exterior",
-                                     "costo_construccion_estacionamiento_exterior",
-                                     5.0, step = 1),
+                        # numericInput("costo_construccion_sobre_nt1",
+                        #              "costo_construccion_sobre_nt1",
+                        #              24, step = 1),
+                        # numericInput("costo_construccion_sobre_nt2",
+                        #              "costo_construccion_sobre_nt2",
+                        #              18, step = 1),
+                        # numericInput("costo_construccion_subterraneo",
+                        #              "costo_construccion_subterraneo",
+                        #              14, step = 1),
+                        # numericInput("costo_construccion_estacionamiento_exterior",
+                        #              "costo_construccion_estacionamiento_exterior",
+                        #              5.0, step = 1),
+                        autonumericInput("costo_construccion_sobre_nt1",
+                                         label = "Costo de construcción por m²",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 24, step = 1),
+                        autonumericInput("costo_construccion_sobre_nt2",
+                                         label = "Costo de construcción por m²",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 18, step = 1),
+                        autonumericInput("costo_construccion_subterraneo",
+                                         label = "Costo de construcción por m²",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 14, step = 1),
+                        autonumericInput("costo_construccion_estacionamiento_exterior",
+                                         label = "Costo de construcción por m²",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 5, step = 1),
                         
                         # costo urbanizacion
-                        numericInput("costo_urbanizacion_areaverde_exterior",
-                                     "costo_urbanizacion_areaverde_exterior",
-                                     2.0, step = 1),
+                        # numericInput("costo_urbanizacion_areaverde_exterior",
+                        #              "costo_urbanizacion_areaverde_exterior",
+                        #              2.0, step = 1),
+                        autonumericInput("costo_urbanizacion_areaverde_exterior",
+                                         label = "Costo de urbanización área verde exterior por m²",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 2, step = 1),
                         
                         ### costos proyecto
                         numericInput("costo_proyecto_arquitectura",
@@ -577,21 +618,21 @@ ui <- page_fluid(
                           
                           h4("Costos de construcción"),
                           br(),
-                          cifra("suma_superficies_totales:", textOutput("suma_superficies_totales")),
-                          cifra("suma_superficies_mercado:", textOutput("suma_superficies_mercado")),
+                          cifra("Suma de duperficies totales:", textOutput("suma_superficies_totales")),
+                          cifra("Suma de duperficies Mercado:", textOutput("suma_superficies_mercado")),
                           # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
                           
                           br(),
-                          cifra("total_costo_construccion_sobre_nt1:", textOutput("total_costo_construccion_sobre_nt1")),
-                          cifra("total_costo_construccion_sobre_nt2:", textOutput("total_costo_construccion_sobre_nt2")),
+                          cifra("Total costos de construcción sobre NT1:", textOutput("total_costo_construccion_sobre_nt1")),
+                          cifra("Total costos de construcción sobre NT2:", textOutput("total_costo_construccion_sobre_nt2")),
                           br(),
-                          cifra("total_costo_construccion_subterraneo:", textOutput("total_costo_construccion_subterraneo")),
-                          cifra("total_costo_construccion_estacionamiento_exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
-                          cifra("total_costo_urbanizacion_areaverde_exterior:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
+                          cifra("Total costos de construcción subterráneo:", textOutput("total_costo_construccion_subterraneo")),
+                          cifra("Total costos de construcción estacionamiento exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
+                          cifra("Total costos de urbanización áreas verdes exteriores:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
                           
                           br(),
-                          cifra("costo_proyecto:", textOutput("costo_proyecto")),
-                          cifra("gastos_administrativos:", textOutput("gastos_administrativos")),
+                          cifra("Costo del proyecto:", textOutput("costo_proyecto")),
+                          cifra("Gastos administrativos:", textOutput("gastos_administrativos")),
                           
                           hr(),
                           
@@ -616,13 +657,13 @@ ui <- page_fluid(
                         h4("Compensación")
                       ),
                       autonumericInput("compensacion_densidad",
-                                       label = "compensacion_densidad (%)",
+                                       label = "Compensación densidad (%)",
                                        currencySymbol = "%", currencySymbolPlacement = "s",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0, min = 0),
                       
                       autonumericInput("compensacion_construccion",
-                                       label = "compensacion_construccion (%)",
+                                       label = "Compensación construcción (%)",
                                        currencySymbol = "%", currencySymbolPlacement = "s",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0, min = 0)
@@ -646,8 +687,8 @@ ui <- page_fluid(
                           col_widths = c(6, 6),
                           
                           div(
-                            cifra("p_integracion:", textOutput("p_integracion")),
-                            cifra("p_castigo:", textOutput("p_castigo"))
+                            cifra("Integración (%):", textOutput("p_integracion")),
+                            cifra("Castigo (%):", textOutput("p_castigo"))
                           )
                         )
                       )
