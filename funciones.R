@@ -29,7 +29,7 @@ uf <- function(x) {
 }
 
 mt2 <- function(x) {
-  scales::comma(x, suffix = " mt²", big.mark = ".", decimal.mark = ",")
+  scales::comma(x, suffix = " m²", big.mark = ".", decimal.mark = ",")
 }
 
 porcentaje <- function(x, decimales = 0.01) {
