@@ -31,6 +31,7 @@ ui <- page_fluid(
     base_font = bslib::font_google("Roboto Condensed")
   ),
   
+  
   useShinyjs(),
   
   tags$style(
@@ -45,6 +46,10 @@ ui <- page_fluid(
   tags$style(
     HTML(".alerta {background-color: #F3CECE !important;}")
   ),
+  
+  div(style = css(height = "20px")),
+  
+  titlePanel("Compensación Normativa"),
   
   div(style = css(height = "12px")),
   
@@ -95,24 +100,36 @@ ui <- page_fluid(
                   
                   card_body(
                     
-                    em("Precio Venta Deptos Integración: Se consideran valores según llamado especial 2024 (Res. Exenta 385)"),
+                    em("Precio Venta Deptos Integración: Considerar valores según llamado especial 2024 a Programa DS N° 19 (Res. Exenta 385) o reglamento que corresponda."),
                     
-                    
-                    autonumericInput("precio_max_int_t1",
-                                     label = "Tramo 1",
-                                     currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
-                                     decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
-                                     value = 1400, step = 100),
-                    autonumericInput("precio_max_int_t2",
-                                     label = "Tramo 2",
-                                     currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
-                                     decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
-                                     value = 1700, step = 100),
-                    autonumericInput("precio_max_int_t3",
-                                     label = "Tramo 3",
-                                     currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
-                                     decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
-                                     value = 2250, step = 100),
+                    layout_columns(
+                      
+                      div(
+                        
+                        autonumericInput("precio_max_int_t1",
+                                         label = "Tramo 1",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 1400, step = 100),
+                        autonumericInput("precio_max_int_t2",
+                                         label = "Tramo 2",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 1700, step = 100),
+                        autonumericInput("precio_max_int_t3",
+                                         label = "Tramo 3",
+                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 2250, step = 100)
+                      ),
+                      
+                      div(
+                        br(),
+                        em("Precios establecidos en llamado especial 2024:
+                           Tramo 1: máximo 1.400 UF; Tramo 2: entre 1400 y
+                         1700 UF; Tramo 3: entre 1700 y 2800 UF")
+                      )
+                    )
                     
                     # sliderInput("calidad_ep",
                     #             "calidad_ep",
@@ -177,7 +194,7 @@ ui <- page_fluid(
                       
                       autonumericInput("superficie_area_comun",
                                        currencySymbol = "%", currencySymbolPlacement = "s",
-                                       "Superficie de Área Común Proyectada",
+                                       "Superficie de Área Común Proyectada", align = "left",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
                       ) |> 
@@ -358,11 +375,11 @@ ui <- page_fluid(
                                   ),
                                   div(
                                     em("%"),
-                                    autonumericInput("porcentaje_s1", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                                    autonumericInput("porcentaje_s2", label = NULL, value = 0.20*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                                    autonumericInput("porcentaje_s3", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                                    autonumericInput("porcentaje_s4", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
-                                    autonumericInput("porcentaje_s5", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                    autonumericInput("porcentaje_s1", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, align = "left", width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                    autonumericInput("porcentaje_s2", label = NULL, value = 0.20*100, step = 0.05*100, min = 0, max = 1*100, align = "left", width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                    autonumericInput("porcentaje_s3", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, align = "left", width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                    autonumericInput("porcentaje_s4", label = NULL, value = 0.15*100, step = 0.05*100, min = 0, max = 1*100, align = "left", width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
+                                    autonumericInput("porcentaje_s5", label = NULL, value = 0.25*100, step = 0.05*100, min = 0, max = 1*100, align = "left", width = "100%", currencySymbol = "%", currencySymbolPlacement = "s", decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = "."),
                                     
                                   ),
                                   div(
@@ -440,21 +457,21 @@ ui <- page_fluid(
                       div(
                         autonumericInput("dotacion_est_viv_menor_50m2",
                                          "Dotación de estacionamientos para viv. menores a 50m²",
-                                         currencySymbol = " un/viv", currencySymbolPlacement = "s",
+                                         currencySymbol = " un/viv", currencySymbolPlacement = "s", align = "left",
                                          0.33, decimalPlaces = 1, step = 0.1),
                         # numericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
                         #              "Dotación de estacionamientos para viv. sobre 50m² y menores a 100m²",
                         #              0.5, step = 0.1),
                         autonumericInput("dotacion_est_viv_sobre_50m2_menor_100m2",
                                          "Dotación de estacionamientos para viv. entre 50m² y 100m²",
-                                         currencySymbol = " un/viv", currencySymbolPlacement = "s",
+                                         currencySymbol = " un/viv", currencySymbolPlacement = "s", align = "left",
                                          0.5, decimalPlaces = 1, step = 0.1),
                         # numericInput("dotacion_est_viv_social",
                         #              "Dotación de estacionamientos por vivienda social",
                         #              0, step = 0.5),
                         autonumericInput("dotacion_est_viv_social",
                                          "Dotación de estacionamientos por vivienda social (tramo 1)",
-                                         currencySymbol = " un/viv", currencySymbolPlacement = "s",
+                                         currencySymbol = " un/viv", currencySymbolPlacement = "s", align = "left",
                                          0, decimalPlaces = 1, step = 0.1),
                         explicacion("Dotación Estacionam.: Considera dotación para viviendas menores a 100m2 según PRMS y para viviendas de familias vulnerables según Ley de Copropiedad y Ley de Integración Social."),
                         
@@ -464,14 +481,14 @@ ui <- page_fluid(
                         #              0, step = 0.5),
                         h6("Rebaja"),
                         layout_columns(col_widths = c(8, 4),
-                        autonumericInput("dotacion_est_rebaja",
-                                         NULL,
-                                         currencySymbol = "%", currencySymbolPlacement = "s",
-                                         0, decimalPlaces = 0,
-                                         width = "100%"),
-                        selectInput("dotacion_est_rebaja_opcion",
-                                    NULL,
-                                    choices = c("%", "un."))
+                                       autonumericInput("dotacion_est_rebaja",
+                                                        NULL,
+                                                        currencySymbol = "%", currencySymbolPlacement = "s",
+                                                        0, decimalPlaces = 0, align = "left",
+                                                        width = "100%"),
+                                       selectInput("dotacion_est_rebaja_opcion",
+                                                   NULL,
+                                                   choices = c("%", "un."))
                         ),
                         explicacion("Indicar rebaja (si corresponde) según art 2.4. 1 y 2.4. 1 bis OGUC"),
                         
@@ -492,17 +509,17 @@ ui <- page_fluid(
                         
                         autonumericInput("estacionamiento_subterraneo",
                                          "Estacionamiento subterraneo p/unid.",
-                                         currencySymbol = "%", currencySymbolPlacement = "s",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                          decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                          value = 50, min = 0),
                         autonumericInput("estacionamiento_exterior",
                                          "Estacionamiento exterior p/unid.",
-                                         currencySymbol = "%", currencySymbolPlacement = "s",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                          decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                          value = 50, min = 0),
                         autonumericInput("estacionamiento_visita",
                                          "Estacionamiento visita p/unid.",
-                                         currencySymbol = "%", currencySymbolPlacement = "s",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                          decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                          value = 15, min = 0),
                         
@@ -591,9 +608,13 @@ ui <- page_fluid(
                   ),
                   card_body(
                     layout_columns(
-                      col_widths = c(6, 6),
+                      col_widths = c(4, 4, 4),
                       
                       div(
+                        h4("Costo Directo"),
+                        
+                        
+                        
                         # numericInput("costo_construccion_sobre_nt1",
                         #              "costo_construccion_sobre_nt1",
                         #              24, step = 1),
@@ -607,23 +628,27 @@ ui <- page_fluid(
                         #              "costo_construccion_estacionamiento_exterior",
                         #              5.0, step = 1),
                         autonumericInput("costo_construccion_sobre_nt1",
-                                         label = "Costo de construcción por m²",
-                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         label = "Costo de construcción SNT-1",
+                                         currencySymbol = " UF/m²", currencySymbolPlacement = "s", align = "left", 
                                          decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                          value = 24, step = 1),
+                        explicacion("Terminación estándar"),
+                        
                         autonumericInput("costo_construccion_sobre_nt2",
-                                         label = "Costo de construcción por m²",
-                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         label = "Costo de construcción SNT-2",
+                                         currencySymbol = " UF/m²", currencySymbolPlacement = "s", align = "left", 
                                          decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                          value = 18, step = 1),
+                        explicacion("Terminación obra gruesa habitable"),
+                        
                         autonumericInput("costo_construccion_subterraneo",
-                                         label = "Costo de construcción por m²",
-                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         label = "Costo de construcción subterráneos",
+                                         currencySymbol = " UF/m²", currencySymbolPlacement = "s", align = "left", 
                                          decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                          value = 14, step = 1),
                         autonumericInput("costo_construccion_estacionamiento_exterior",
-                                         label = "Costo de construcción por m²",
-                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         label = "Costo de construcción exteriores",
+                                         currencySymbol = " UF/m²", currencySymbolPlacement = "s", align = "left", 
                                          decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                          value = 5, step = 1),
                         
@@ -632,63 +657,97 @@ ui <- page_fluid(
                         #              "costo_urbanizacion_areaverde_exterior",
                         #              2.0, step = 1),
                         autonumericInput("costo_urbanizacion_areaverde_exterior",
-                                         label = "Costo de urbanización área verde exterior por m²",
-                                         currencySymbol = " UF", currencySymbolPlacement = "s", align = "left", 
+                                         label = "Costo de urbanización",
+                                         currencySymbol = " UF/m²", currencySymbolPlacement = "s", align = "left", 
                                          decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                          value = 2, step = 1),
-                        
-                        ### costos proyecto
-                        numericInput("costo_proyecto_arquitectura",
-                                     "costo_proyecto_arquitectura",
-                                     0.020, step = 0.01),
-                        numericInput("costo_proyecto_permisos",
-                                     "costo_proyecto_permisos",
-                                     0.025, step = 0.01),
-                        
-                        # gastos administrativos
-                        numericInput("costo_proyecto_administrativo_comercialización",
-                                     "costo_proyecto_administrativo_comercialización",
-                                     0.025, step = 0.01),
-                        numericInput("costo_proyecto_administrativo_publicidad",
-                                     "costo_proyecto_administrativo_publicidad",
-                                     0.040, step = 0.01),
-                        numericInput("costo_proyecto_administrativo_administración",
-                                     "costo_proyecto_administrativo_administración",
-                                     0.035, step = 0.01)
+                        explicacion("Considera áreas verdes")
                         
                       ),
                       
-                      div(style = css(padding_top = "16px"),
-                          
-                          h4("Costos de construcción"),
-                          br(),
-                          cifra("Suma de duperficies totales:", textOutput("suma_superficies_totales")),
-                          cifra("Suma de duperficies Mercado:", textOutput("suma_superficies_mercado")),
-                          # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
-                          
-                          br(),
-                          cifra("Total costos de construcción sobre NT1:", textOutput("total_costo_construccion_sobre_nt1")),
-                          cifra("Total costos de construcción sobre NT2:", textOutput("total_costo_construccion_sobre_nt2")),
-                          br(),
-                          cifra("Total costos de construcción subterráneo:", textOutput("total_costo_construccion_subterraneo")),
-                          cifra("Total costos de construcción estacionamiento exterior:", textOutput("total_costo_construccion_estacionamiento_exterior")),
-                          cifra("Total costos de urbanización áreas verdes exteriores:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
-                          
-                          br(),
-                          cifra("Costo del proyecto:", textOutput("costo_proyecto")),
-                          cifra("Gastos administrativos:", textOutput("gastos_administrativos")),
-                          
-                          hr(),
-                          
-                          h4("Subtotales"),
-                          cifra("Subtotal terreno:", textOutput("subtotal_terreno")),
-                          
-                          cifra("Costo directo:", textOutput("costo_directo")),
-                          explicacion("Considera suma de costo de construcción y costo de urbanización", margin_top = "-4px", margin_left = "4px"),
-                          cifra("Costo indirecto:", textOutput("costo_indirecto")),
-                          explicacion("Considera suma de costo proyecto y gastos administrativos (inmobiliarios)", margin_top = "-4px", margin_left = "4px"),
-                          br(),
-                          cifra("Costo total:", textOutput("costo_total")),      
+                      div(
+                        
+                        h4("Costo Indirecto"),
+                        
+                        ### costos proyecto
+                        # numericInput("costo_proyecto_arquitectura",
+                        #              "Costo proyecto: arquitectura",
+                        #              0.020, step = 0.01),
+                        # numericInput("costo_proyecto_permisos",
+                        #              "Costo proyecto: permisos",
+                        #              0.025, step = 0.01),
+                        autonumericInput("costo_proyecto_arquitectura",
+                                         "Costo proyecto: arquitectura",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                         decimalPlaces = 1, decimalCharacter = ",", digitGroupSeparator = ".",
+                                         value = 2, min = 0),
+                        explicacion("Considera especialidades"),
+                        
+                        autonumericInput("costo_proyecto_permisos",
+                                         "Costo proyecto: permisos",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                         decimalPlaces = 1, decimalCharacter = ",", digitGroupSeparator = ".",
+                                         value = 2.5, min = 0),
+                        explicacion("Considera empalmes y Derechos municipales"),
+                        
+                        # gastos administrativos
+                        # numericInput("costo_proyecto_administrativo_comercialización",
+                        #              "Gasto administrativo: comercialización",
+                        #              0.025, step = 0.01),
+                        # numericInput("costo_proyecto_administrativo_publicidad",
+                        #              "Gasto administrativo: publicidad",
+                        #              0.040, step = 0.01),
+                        # numericInput("costo_proyecto_administrativo_administración",
+                        #              "Gasto administrativo: administración",
+                        #              0.035, step = 0.01)
+                        autonumericInput("costo_proyecto_administrativo_comercialización",
+                                         "Gasto administrativo: comercialización",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                         decimalPlaces = 1, decimalCharacter = ",", digitGroupSeparator = ".",
+                                         value = 2.5, min = 0),
+                        autonumericInput("costo_proyecto_administrativo_publicidad",
+                                         "Gasto administrativo: publicidad",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                         decimalPlaces = 1, decimalCharacter = ",", digitGroupSeparator = ".",
+                                         value = 4, min = 0),
+                        autonumericInput("costo_proyecto_administrativo_administración",
+                                         "Gasto administrativo: administración",
+                                         currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                         decimalPlaces = 1, decimalCharacter = ",", digitGroupSeparator = ".",
+                                         value = 3.5, min = 0),
+                      ),
+                      
+                      div(#style = css(padding_top = "16px"),
+                        
+                        h4("Costos de construcción"),
+                        br(),
+                        cifra("Suma de duperficies totales:", textOutput("suma_superficies_totales")),
+                        # cifra("Suma de duperficies Mercado:", textOutput("suma_superficies_mercado")),
+                        # cifra("suma_superficies_tramo_1y2:", textOutput("suma_superficies_tramo_1y2")),
+                        
+                        br(),
+                        cifra("Total costo de construcción sobre SNT1:", textOutput("total_costo_construccion_sobre_nt1")),
+                        cifra("Total costo de construcción sobre SNT2:", textOutput("total_costo_construccion_sobre_nt2")),
+                        br(),
+                        cifra("Total costo de construcción subterráneos:", textOutput("total_costo_construccion_subterraneo")),
+                        cifra("Total costo de construcción estacionamiento exteriores:", textOutput("total_costo_construccion_estacionamiento_exterior")),
+                        cifra("Total costo de urbanización áreas verdes exteriores:", textOutput("total_costo_urbanizacion_areaverde_exterior")),
+                        
+                        br(),
+                        cifra("Costo proyecto:", textOutput("costo_proyecto")),
+                        cifra("Gastos administrativos:", textOutput("gastos_administrativos")),
+                        
+                        hr(),
+                        
+                        h4("Subtotales"),
+                        cifra("Costo terreno:", textOutput("subtotal_terreno")),
+                        
+                        cifra("Costo directo:", textOutput("costo_directo")),
+                        explicacion("Considera suma de costo de construcción y costo de urbanización", margin_top = "-4px", margin_left = "4px"),
+                        cifra("Costo indirecto:", textOutput("costo_indirecto")),
+                        explicacion("Considera suma de costo proyecto y gastos administrativos (inmobiliarios)", margin_top = "-4px", margin_left = "4px"),
+                        br(),
+                        cifra("Costo total:", textOutput("costo_total")),      
                       )
                     )
                   )
@@ -702,13 +761,13 @@ ui <- page_fluid(
                       ),
                       autonumericInput("compensacion_densidad",
                                        label = "Compensación densidad (%)",
-                                       currencySymbol = "%", currencySymbolPlacement = "s",
+                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0, min = 0),
                       
                       autonumericInput("compensacion_construccion",
                                        label = "Compensación construcción (%)",
-                                       currencySymbol = "%", currencySymbolPlacement = "s",
+                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                        value = 0, min = 0)
                     )
@@ -836,9 +895,9 @@ server <- function(input, output, session) {
   # opción de selector de rebaja estacionamientos
   observeEvent(input$dotacion_est_rebaja_opcion, {
     if (input$dotacion_est_rebaja_opcion == "un.") {
-    updateAutonumericInput(session,
-                           "dotacion_est_rebaja", 
-                           options = list(currencySymbol = " un."))
+      updateAutonumericInput(session,
+                             "dotacion_est_rebaja", 
+                             options = list(currencySymbol = " un."))
     } else if (input$dotacion_est_rebaja_opcion == "%") {
       updateAutonumericInput(session,
                              "dotacion_est_rebaja", 
@@ -1162,7 +1221,7 @@ server <- function(input, output, session) {
     
     # aplicar rebaja
     if (input$dotacion_est_rebaja_opcion == "%") {
-    total_2 <- total_1 * (1-(input$dotacion_est_rebaja/100))
+      total_2 <- total_1 * (1-(input$dotacion_est_rebaja/100))
     } else if (input$dotacion_est_rebaja_opcion == "un.") {
       total_2 <- total_1 - input$dotacion_est_rebaja
     }
@@ -1303,7 +1362,7 @@ server <- function(input, output, session) {
     
     # costo_directo()
     (costo_directo() - total_costo_construccion_sobre_nt2()) * # descontarles tramo 1 y 2
-      (input$costo_proyecto_arquitectura + input$costo_proyecto_permisos)
+      ((input$costo_proyecto_arquitectura/100) + (input$costo_proyecto_permisos/100))
   })
   # tramos 1 y 2 deberían ir con asistencia técnica del minvu, 
   # por lo que se deberían descontar esas superficies de departamentos como costo de proyecto (especulación)
@@ -1311,9 +1370,9 @@ server <- function(input, output, session) {
   gastos_administrativos = reactive({
     # total_ingreso() * #dejar solo el ingreso de mercado (restar tramo 1, 2 y 3)
     # browser()
-    gastos_administrativos <- sum(input$costo_proyecto_administrativo_comercialización, 
-                                  input$costo_proyecto_administrativo_publicidad, 
-                                  input$costo_proyecto_administrativo_administración)
+    gastos_administrativos <- sum((input$costo_proyecto_administrativo_comercialización/100), 
+                                  (input$costo_proyecto_administrativo_publicidad/100), 
+                                  (input$costo_proyecto_administrativo_administración/100))
     
     (ingreso_deptos_mercado() + ingreso_bodega_estacionamiento()) * gastos_administrativos
   })
