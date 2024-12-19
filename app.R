@@ -23,15 +23,16 @@ color <- list("fondo" = "#F3F4F8",
 source("funciones.R", local = TRUE)
 
 
-# ui <- page_fluid(
 ui <- page_fluid(
+  
+  # tema ----
   theme = bs_theme(
     bg = color$fondo, fg = color$texto, primary = color$primario,
     # bslib also makes it easy to import CSS fonts
     base_font = bslib::font_google("Roboto Condensed")
   ),
   
-  
+  # css ----
   useShinyjs(),
   
   tags$style(
@@ -47,9 +48,20 @@ ui <- page_fluid(
     HTML(".alerta {background-color: #F3CECE !important;}")
   ),
   
+  # header ----
   div(style = css(height = "20px")),
   
-  titlePanel("Compensación Normativa"),
+  layout_columns(col_widths = c(6, 3, 3),
+                 titlePanel("Compensación Normativa"),
+                 
+                 actionButton("modal_landing",
+                              "Introducción", style = css(margin_top = "4px", padding = "4px", font_size = "80%")),
+                 
+                 actionButton("modal_metodologia",
+                              "Metodología", style = css(margin_top = "4px", padding = "4px", font_size = "80%"))
+  ),
+  
+  
   
   div(style = css(height = "12px")),
   
@@ -327,14 +339,37 @@ ui <- page_fluid(
               
               div(
                 
+                ## compensación ----
+                div(id = "panel_compensacion",
+                    card(
+                      card_header(
+                        h4("Compensación Normativa por Integración Social")
+                      ),
+                      autonumericInput("compensacion_densidad",
+                                       label = "Aumento en Densidad Permitida (%)",
+                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                                       value = 0, min = 0),
+                      
+                      autonumericInput("compensacion_construccion",
+                                       label = "Aumento en Constructibilidad Permitida (%)",
+                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
+                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                                       value = 0, min = 0),
+                      
+                      # Al lado de ambos casilleros poner el texto dinámico "La Densidad cambió de XXXX Hab/Há a XXXX Hab/Há" y "La Constructibilidad permitida cambió de XXXX a XXXX". En la densidad el texto debe adaptarse a si se usa Hab/Ha o Viv/Ha en la declaración de la densidad en pestaña de Terreno.
+                    )
+                    # autonumericInput("superficie_area_comun",
+                    #                  currencySymbol = "%", currencySymbolPlacement = "s",
+                    #                  "superficie_area_comun",
+                    #                  decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
+                    #                  value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
+                    # ),
+                ) |> hidden(),
                 
                 
                 ## ingresos ----
                 div(
-                  
-                  # layout_columns(
-                  #   col_widths = c(8, 4),
-                  
                   div(
                     
                     card(
@@ -346,15 +381,6 @@ ui <- page_fluid(
                                 em("Cada fila de inputs corresponde a un tipo de vivienda"),
                                 layout_columns(
                                   col_widths = c(3, 3, 2, 2, 2),
-                                  
-                                  
-                                  # div(em("Tipos"),
-                                  #     em("Tipo 1"),
-                                  #     em("Tipo 2"),
-                                  #     em("Tipo 3"),
-                                  #     em("Tipo 4"),
-                                  #     em("Tipo 5"),
-                                  # ),
                                   
                                   div(
                                     em("Tamaños"),
@@ -562,14 +588,19 @@ ui <- page_fluid(
                 
                 ### bodegas ----
                 card(
-                  card_header(h3("Bodegas")),
+                  card_header(h3("Dotación de Bodegas por Departamento")),
                   card_body(
                     layout_columns(
                       col_widths = c(7, 5),
                       div(
-                        numericInput("bodega_dotacion", 
-                                     "Dotación de bodegas", 
-                                     1, step = 0.5),
+                        # numericInput("bodega_dotacion", 
+                        #              "Dotación de bodegas", 
+                        #              1, step = 0.5),
+                        autonumericInput("bodega_dotacion",
+                                         label = "Dotación de bodegas",
+                                         currencySymbol = " bod/dep", currencySymbolPlacement = "s", align = "left", 
+                                         decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
+                                         value = 1, step = 0.5),
                         # numericInput("precio_bodega", 
                         #              "Precio por bodega", 
                         #              80, step = 5)
@@ -753,31 +784,6 @@ ui <- page_fluid(
                   )
                 ),
                 
-                ## compensación ----
-                div(id = "panel_compensacion",
-                    card(
-                      card_header(
-                        h4("Compensación")
-                      ),
-                      autonumericInput("compensacion_densidad",
-                                       label = "Compensación densidad (%)",
-                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
-                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                                       value = 0, min = 0),
-                      
-                      autonumericInput("compensacion_construccion",
-                                       label = "Compensación construcción (%)",
-                                       currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
-                                       decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                                       value = 0, min = 0)
-                    )
-                    # autonumericInput("superficie_area_comun",
-                    #                  currencySymbol = "%", currencySymbolPlacement = "s",
-                    #                  "superficie_area_comun",
-                    #                  decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                    #                  value = 0.15*100, min = 0*100, max = 1*100, step = 0.01*100
-                    # ),
-                ) |> hidden(),
                 
                 ## castigo ----
                 div(id = "panel_castigo",
@@ -827,6 +833,20 @@ ui <- page_fluid(
                 )
               )
     )
+  ),
+  
+  # footer ----
+  div(
+    div(style = css(max_height = "100px", width = "100%", text_align = "center"),
+        layout_columns(fillable = FALSE,
+                       img(src = "logo_minvu.png", style = css(max_height = "70px")),
+                       img(src = "logo_fau.svg", style = css(max_height = "65px")),
+                       img(src = "logo_pnud.png", style = css(max_height = "70px"))
+        )
+    ),
+    div(style = css(color = color$texto, font_size = "60%", text_align = "center", opacity = "40%"),
+        p("Desarrollado por", a("Bastián Olea Herrera", href = "https://bastianolea.rbind.io", style = css(color = color$texto)))
+    )
   )
 )
 
@@ -834,6 +854,68 @@ ui <- page_fluid(
 
 
 server <- function(input, output, session) {
+  
+  
+  # modales ----
+  ## landing ----
+  modal_landing <- reactive(modalDialog(
+    h1("Plataforma para Evaluación de Compensación Normativa por Integración Social"),
+    
+    div(style = css(margin_bottom = "20px"),
+        img(src = "landing.jpg", width = "100%")
+    ),
+    
+    p("Plataforma Piloto de uso interno MINVU para evaluar porcentajes de incremento normativo (densidad permitida) para compensar por potenciales minusvalías por exigencias de incorporar porcentajes de Integración Social en Proyectos de Vivienda."),
+    
+    p("Esta plataforma es parte de un proyecto de colaboración entre Equipo de Gestión de Suelo del MINVU, y el Departamento de Urbanismo de la Facultad de Arquitectura y Urbanismo de la Universidad de Chile, a cargo de los académicos Tomás Cox, Mónica Bustos, y con el apoyo de los profesionales Matías Power y Bastián Olea, y con financiamiento de PNUD."),
+    
+    div(style = css(max_height = "100px", width = "100%", text_align = "center"),
+        layout_columns(fillable = FALSE,
+                       img(src = "logo_minvu.png", style = css(max_height = "70px")),
+                       img(src = "logo_fau.svg", style = css(max_height = "65px")),
+                       img(src = "logo_pnud.png", style = css(max_height = "70px"))
+        )
+    ),
+    
+    easyClose = TRUE, fade = TRUE,
+    
+    footer = div(actionButton("modal_metodologia",
+                              "Metodología"),
+                 modalButton("Ir a la Evaluación", icon = icon("arrow-right"))
+    )
+  ))
+  
+  # se abre al iniciar
+  observe({
+    req(modal_landing())
+    showModal(ui = modal_landing())
+  })
+  
+  # se abre con el botón
+  observeEvent(input$modal_landing, {
+    req(modal_landing())
+    showModal(ui = modal_landing())
+  })
+  
+  
+  ## metodología ----
+  observeEvent(input$modal_metodologia, {
+    
+    removeModal(session)
+    
+    showModal(ui = modalDialog(
+      h1("Metodología"),
+      
+      
+      easyClose = TRUE, fade = TRUE,
+      
+      footer = div(modalButton("Volver")
+      )
+    )
+    )
+  }, ignoreInit = TRUE)
+  
+  
   
   # observadores ----
   
@@ -904,6 +986,16 @@ server <- function(input, output, session) {
                              options = list(currencySymbol = " %"))
     }
   })
+  
+  
+  ## tramos ----
+  # Mix de departamentos proyecto, cuando se elija un Tramo, que se reemplace el valor UF/m2 por el correspondiente a ese tramo que se definió en pestaña de Terreno.
+  
+  observeEvent(c(input$tramo_s1, input$tamaño_tipo_s1), calculo_mt2_tipo(session, input, 1))
+  observeEvent(c(input$tramo_s2, input$tamaño_tipo_s2), calculo_mt2_tipo(session, input, 2))
+  observeEvent(c(input$tramo_s3, input$tamaño_tipo_s3), calculo_mt2_tipo(session, input, 3))
+  observeEvent(c(input$tramo_s4, input$tamaño_tipo_s4), calculo_mt2_tipo(session, input, 4))
+  observeEvent(c(input$tramo_s5, input$tamaño_tipo_s5), calculo_mt2_tipo(session, input, 5))
   
   
   
@@ -993,6 +1085,7 @@ server <- function(input, output, session) {
   })
   
   
+  # cálculo ----
   
   ## castigo ----
   
@@ -1252,7 +1345,7 @@ server <- function(input, output, session) {
   ### bodega ----
   
   total_bodegas = reactive(input$bodega_dotacion * total_cantidad_unidades())
-  output$total_bodegas <- renderText(total_bodegas())
+  output$total_bodegas <- renderText(paste(total_bodegas(), "bod/dep"))
   
   superficie_exterior = reactive(
     ((total_estacionamientos() * (input$estacionamiento_visita/100)) + (total_estacionamientos() * (input$estacionamiento_exterior/100))) * 12.5
