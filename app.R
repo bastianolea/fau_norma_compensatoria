@@ -65,7 +65,7 @@ ui <- page_fluid(
   
   div(style = css(height = "12px")),
   
-  navset_card_tab(
+  navset_card_tab(id = "pestañas",
     # pestaña 1 ----
     nav_panel("Datos del terreno",
               
@@ -841,8 +841,9 @@ ui <- page_fluid(
     # pestaña 3 ----
     nav_panel("Resultados",
               
-              
               em("Para calcular o actualizar los resultados, debe visitar la pestaña Evaluación y visualizar cada uno de los escenarios."),
+              
+              # actionButton("actualizar_resultados","Actualizar resultados"),
               
               card(
                 uiOutput("resultados_ev_merc")
@@ -1173,7 +1174,26 @@ server <- function(input, output, session) {
   })
   
   
+  ## actualizar resultados
   
+  # # no funciona, por alguna razón se cambia la pestaña pero solo cambia el botón una vez
+  # observeEvent(input$actualizar_resultados, {
+  #   
+  #   updateNavbarPage(session, "pestañas",
+  #                     selected = "Evaluación")
+  # 
+  #   updateRadioGroupButtons(session, "escenario",
+  #                           selected = "EV-MERC")
+  # 
+  #   updateRadioGroupButtons(session, "escenario",
+  #                           selected = "EV-INT1")
+  # 
+  #   updateRadioGroupButtons(session, "escenario",
+  #                           selected = "EV-INT2")
+  # 
+  #   # updateNavbarPage(session, "pestañas",
+  #                    # selected = "Resultados")
+  # })
   
   # cálculo ----
   
@@ -1691,6 +1711,7 @@ server <- function(input, output, session) {
   
   observe({
     if (input$escenario == "EV-MERC") {
+      message("guardando resultados EV-MERC")
       ev_merc$total_cantidad_unidades <- total_cantidad_unidades()
       ev_merc$normativa_densidad <- normativa_densidad()
       ev_merc$total_ingreso <- total_ingreso()
@@ -1700,6 +1721,7 @@ server <- function(input, output, session) {
       ev_merc$rentabilidad <- rentabilidad()
       
     } else if (input$escenario == "EV-INT1") {
+      message("guardando resultados EV-INT1")
       ev_int1$total_cantidad_unidades <- total_cantidad_unidades()
       ev_int1$normativa_densidad <- normativa_densidad()
       ev_int1$total_ingreso <- total_ingreso()
@@ -1709,6 +1731,7 @@ server <- function(input, output, session) {
       ev_int1$rentabilidad <- rentabilidad()
       
     } else if (input$escenario == "EV-INT2") {
+      message("guardando resultados EV-INT2")
       ev_int2$total_cantidad_unidades <- total_cantidad_unidades()
       ev_int2$normativa_densidad <- normativa_densidad()
       ev_int2$total_ingreso <- total_ingreso()
