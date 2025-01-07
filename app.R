@@ -358,7 +358,9 @@ ui <- page_fluid(
                                        value = 0, min = 0),
                       
                       # Al lado de ambos casilleros poner el texto dinámico "La Densidad cambió de XXXX Hab/Há a XXXX Hab/Há" y "La Constructibilidad permitida cambió de XXXX a XXXX". En la densidad el texto debe adaptarse a si se usa Hab/Ha o Viv/Ha en la declaración de la densidad en pestaña de Terreno.
+                      textOutput("texto_aumento_densidad")
                     )
+                    
                     # autonumericInput("superficie_area_comun",
                     #                  currencySymbol = "%", currencySymbolPlacement = "s",
                     #                  "superficie_area_comun",
@@ -425,7 +427,8 @@ ui <- page_fluid(
                                         uiOutput("cantidades_tipos")
                                     ),
                                     div(style = css(font_size = "90%"),
-                                        p("Total:", textOutput("total_cantidad_unidades", inline = TRUE), "unid.")
+                                        p("Total:", textOutput("total_cantidad_unidades", inline = TRUE), "unid."),
+                                        p("% Viviendas Sociales:", textOutput("p_integracion2", inline = TRUE))
                                     )
                                   )
                                 ),
@@ -823,21 +826,40 @@ ui <- page_fluid(
                 
                 # estática
                 card(
-                  card_header(h3("Rentabilidad")),
+                  card_header(h3("Resultados")),
                   card_body(
                     
                     uiOutput("resultados_rentabilidad_2"),
-                    br()
+                    # br()
                   )
                   
                 )
               )
+    ),
+    
+    
+    # pestaña 3 ----
+    nav_panel("Resultados",
+              
+              
+              em("Para calcular o actualizar los resultados, debe visitar la pestaña Evaluación y visualizar cada uno de los escenarios."),
+              
+              card(
+                uiOutput("resultados_ev_merc")
+              ),
+              card(
+                uiOutput("resultados_ev_int1")
+              ),
+              card(
+                uiOutput("resultados_ev_int2")
+              )
     )
+    
   ),
   
   # footer ----
   div(
-    div(style = css(max_height = "100px", width = "100%", text_align = "center"),
+    div(style = css(width = "100%", text_align = "center"),
         layout_columns(fillable = FALSE,
                        img(src = "logo_minvu.png", style = css(max_height = "70px")),
                        img(src = "logo_fau.svg", style = css(max_height = "65px")),
@@ -885,11 +907,11 @@ server <- function(input, output, session) {
     )
   ))
   
-  # se abre al iniciar
-  observe({
-    req(modal_landing())
-    showModal(ui = modal_landing())
-  })
+  # # se abre al iniciar
+  # observe({
+  #   req(modal_landing())
+  #   showModal(ui = modal_landing())
+  # })
   
   # se abre con el botón
   observeEvent(input$modal_landing, {
@@ -1002,9 +1024,21 @@ server <- function(input, output, session) {
   
   ## escenarios ----
   
+  # para guardar tramos en ev2, que luego se cambian solos en ev-merc, 
+  # para así poder reestablecerlos al volver a ev2
+  tramos_ev2 <- reactiveValues()
+  
   # cambiar escenarios
   observeEvent(input$escenario, {
     if (input$escenario == "EV-MERC") {
+      
+      # guardar los tramos que estaban elegidos en ev2
+      tramos_ev2$tramo_s1 <- input$tramo_s1
+      tramos_ev2$tramo_s2 <- input$tramo_s2
+      tramos_ev2$tramo_s3 <- input$tramo_s3
+      tramos_ev2$tramo_s4 <- input$tramo_s4
+      tramos_ev2$tramo_s5 <- input$tramo_s5
+      
       updateSelectInput(session, "tramo_s1", selected = "Mercado") 
       updateSelectInput(session, "tramo_s2", selected = "Mercado") 
       updateSelectInput(session, "tramo_s3", selected = "Mercado") 
@@ -1016,6 +1050,22 @@ server <- function(input, output, session) {
       disable("tramo_s3")
       disable("tramo_s4")
       disable("tramo_s5")
+      
+      enable("tamaño_tipo_s1")
+      enable("tamaño_tipo_s2")
+      enable("tamaño_tipo_s3")
+      enable("tamaño_tipo_s4")
+      enable("tamaño_tipo_s5")
+      enable("porcentaje_s1")
+      enable("porcentaje_s2")
+      enable("porcentaje_s3")
+      enable("porcentaje_s4")
+      enable("porcentaje_s5")
+      enable("precios_m2_tipos_s1")
+      enable("precios_m2_tipos_s2")
+      enable("precios_m2_tipos_s3")
+      enable("precios_m2_tipos_s4")
+      enable("precios_m2_tipos_s5")
       
       disable("dotacion_est_viv_social")
       
@@ -1037,6 +1087,29 @@ server <- function(input, output, session) {
       enable("tramo_s4")
       enable("tramo_s5")
       
+      # reestablecer los tramos que estaban elegidos en ev2
+      updateSelectInput(session, "tramo_s1", selected = tramos_ev2$tramo_s1) 
+      updateSelectInput(session, "tramo_s2", selected = tramos_ev2$tramo_s2) 
+      updateSelectInput(session, "tramo_s3", selected = tramos_ev2$tramo_s3) 
+      updateSelectInput(session, "tramo_s4", selected = tramos_ev2$tramo_s4) 
+      updateSelectInput(session, "tramo_s5", selected = tramos_ev2$tramo_s5)
+      
+      enable("tamaño_tipo_s1")
+      enable("tamaño_tipo_s2")
+      enable("tamaño_tipo_s3")
+      enable("tamaño_tipo_s4")
+      enable("tamaño_tipo_s5")
+      enable("porcentaje_s1")
+      enable("porcentaje_s2")
+      enable("porcentaje_s3")
+      enable("porcentaje_s4")
+      enable("porcentaje_s5")
+      enable("precios_m2_tipos_s1")
+      enable("precios_m2_tipos_s2")
+      enable("precios_m2_tipos_s3")
+      enable("precios_m2_tipos_s4")
+      enable("precios_m2_tipos_s5")
+      
       enable("dotacion_est_viv_social")
       
       # updateSelectInput(session, "tramo_s1", selected = "Mercado") 
@@ -1057,11 +1130,26 @@ server <- function(input, output, session) {
       # updateNumericInput(session, "compensacion_construccion", value = 1)
       
     } else if (input$escenario == "EV-INT2") {
-      enable("tramo_s1")
-      enable("tramo_s2")
-      enable("tramo_s3")
-      enable("tramo_s4")
-      enable("tramo_s5")
+      disable("tramo_s1")
+      disable("tramo_s2")
+      disable("tramo_s3")
+      disable("tramo_s4")
+      disable("tramo_s5")
+      disable("tamaño_tipo_s1")
+      disable("tamaño_tipo_s2")
+      disable("tamaño_tipo_s3")
+      disable("tamaño_tipo_s4")
+      disable("tamaño_tipo_s5")
+      disable("porcentaje_s1")
+      disable("porcentaje_s2")
+      disable("porcentaje_s3")
+      disable("porcentaje_s4")
+      disable("porcentaje_s5")
+      disable("precios_m2_tipos_s1")
+      disable("precios_m2_tipos_s2")
+      disable("precios_m2_tipos_s3")
+      disable("precios_m2_tipos_s4")
+      disable("precios_m2_tipos_s5")
       
       enable("dotacion_est_viv_social")
       
@@ -1083,6 +1171,8 @@ server <- function(input, output, session) {
       # updateNumericInput(session, "compensacion_construccion", value = 1.40)
     }
   })
+  
+  
   
   
   # cálculo ----
@@ -1121,7 +1211,7 @@ server <- function(input, output, session) {
     # esto no da 44 jamás
   })
   
-  output$p_integracion <- renderText(p_integracion() |> porcentaje())
+  output$p_integracion2 <- output$p_integracion <- renderText(p_integracion() |> porcentaje())
   output$p_castigo <- renderText(p_castigo() |> porcentaje())
   
   
@@ -1168,6 +1258,27 @@ server <- function(input, output, session) {
   max_superficie_vendible = reactive(superficie_max_util_const() * (1-(input$superficie_area_comun)/100)) #mt2
   output$max_superficie_vendible <- renderText(max_superficie_vendible() |> mt2())
   
+  
+  
+  ## densidad ----
+  
+  
+  # TCOX: En el texto que propongo  ""La Densidad cambió de XXXX Hab/Há a YYYYY Hab/Há"",
+  # XXXX es la densidad que está en sección Datos del Terreno (Normativa Aplicable (actual) y Espacios Comunes), 
+  # y YYYY es XXXX aumentado por el valor que se ingresa en ""Aumento en Densidad Permitida (%)"". 
+  # Es decir si se pone que aumenta en 10%, entonces hay que multiplicar XXXX por (1+0.1) 
+  # para obtener YYYY. 
+  aumento_densidad <- reactive(input$normativa_densidad * (1+(input$compensacion_densidad/100)))
+  
+  output$aumento_densidad <- renderText(aumento_densidad())
+  
+  output$texto_aumento_densidad <- renderText({
+    if (input$compensacion_densidad == 0) {
+      paste("La Densidad no ha cambiado")
+    } else {
+    paste("La Densidad cambió de", input$normativa_densidad, "Hab/Há a", aumento_densidad(), "Hab/Há")
+    }
+  })
   
   ## ingresos ----
   
@@ -1538,7 +1649,7 @@ server <- function(input, output, session) {
   output$resultado_rentabilidad <- renderText(rentabilidad() |> porcentaje())
   
   
-  # output
+  # resultados -----
   output$resultados_rentabilidad_2 <- output$resultados_rentabilidad <- renderUI({
     req(ingreso_deptos(),
         ingreso_bodega_estacionamiento(),
@@ -1548,7 +1659,7 @@ server <- function(input, output, session) {
         rentabilidad())
     # browser()
     div(
-      h3("Resultados", style = css(margin = 0)),
+      # h3("Resultados", style = css(margin = 0, margin_bottom = "12px")),
       # cifra("resultado_ingreso_deptos:", textOutput("resultado_ingreso_deptos")),
       # cifra("resultado_ingreso_bodega_estacionamiento:", textOutput("resultado_ingreso_bodega_estacionamiento")),
       # cifra("resultado_total_ingreso:", textOutput("resultado_total_ingreso")),
@@ -1556,14 +1667,104 @@ server <- function(input, output, session) {
       # cifra("resultado_costo_total:", textOutput("resultado_costo_total")),
       # cifra("resultado_rentabilidad:", textOutput("resultado_rentabilidad"))
       
-      cifra("Ingresos deptos:", ingreso_deptos() |> uf()),
-      cifra("Ingresos bodega y estacionamiento:", ingreso_bodega_estacionamiento() |> uf()),
+      # densidad
+      # cantidad de unidades
+      
+      cifra("Cantidad total de unidades:", total_cantidad_unidades()),
+      cifra("Densidad:", paste(normativa_densidad(), "hab/há")),
+      # cifra("Ingresos deptos:", ingreso_deptos() |> uf()),
+      # cifra("Ingresos bodega y estacionamiento:", ingreso_bodega_estacionamiento() |> uf()),
       cifra("Ingresos totales:", total_ingreso() |> uf()),
-      cifra("Ganancias totales:", total_ganancia() |> uf()),
+      # cifra("Ganancias totales:", total_ganancia() |> uf()),
       cifra("Costos totales:", costo_total() |> uf()),
+      cifra("Porcentaje de aumento en densidad:", porcentaje(input$compensacion_densidad/100)),
+      cifra("Porcentaje de integración social:", p_integracion() |> porcentaje()),
       cifra("Rentabilidad:", rentabilidad() |> porcentaje())
     )
   })
+  
+  
+  # resultados por escenario ----
+  ev_merc <- reactiveValues()
+  ev_int1 <- reactiveValues()
+  ev_int2 <- reactiveValues()
+  
+  observe({
+    if (input$escenario == "EV-MERC") {
+      ev_merc$total_cantidad_unidades <- total_cantidad_unidades()
+      ev_merc$normativa_densidad <- normativa_densidad()
+      ev_merc$total_ingreso <- total_ingreso()
+      ev_merc$costo_total <- costo_total()
+      ev_merc$compensacion_densidad <- input$compensacion_densidad
+      ev_merc$p_integracion <- p_integracion()
+      ev_merc$rentabilidad <- rentabilidad()
+      
+    } else if (input$escenario == "EV-INT1") {
+      ev_int1$total_cantidad_unidades <- total_cantidad_unidades()
+      ev_int1$normativa_densidad <- normativa_densidad()
+      ev_int1$total_ingreso <- total_ingreso()
+      ev_int1$costo_total <- costo_total()
+      ev_int1$compensacion_densidad <- input$compensacion_densidad
+      ev_int1$p_integracion <- p_integracion()
+      ev_int1$rentabilidad <- rentabilidad()
+      
+    } else if (input$escenario == "EV-INT2") {
+      ev_int2$total_cantidad_unidades <- total_cantidad_unidades()
+      ev_int2$normativa_densidad <- normativa_densidad()
+      ev_int2$total_ingreso <- total_ingreso()
+      ev_int2$costo_total <- costo_total()
+      ev_int2$compensacion_densidad <- input$compensacion_densidad
+      ev_int2$p_integracion <- p_integracion()
+      ev_int2$rentabilidad <- rentabilidad()
+    }
+  })
+  
+  # outputs por escenario ----
+  output$resultados_ev_merc <- renderUI({
+    div(
+      h3("Resultados EV1: Mercado", style = css(margin = 0, margin_bottom = "12px")),
+      
+      cifra("Cantidad total de unidades:", ev_merc$total_cantidad_unidades),
+      cifra("Densidad:", paste(ev_merc$normativa_densidad, "hab/há")),
+      cifra("Ingresos totales:", ev_merc$total_ingreso |> uf()),
+      cifra("Costos totales:", ev_merc$costo_total |> uf()),
+      cifra("Porcentaje de aumento en densidad:", porcentaje(ev_merc$compensacion_densidad/100)),
+      cifra("Porcentaje de integración social:", ev_merc$p_integracion |> porcentaje()),
+      cifra("Rentabilidad:", ev_merc$rentabilidad |> porcentaje())
+    )
+  })
+  
+  output$resultados_ev_int1 <- renderUI({
+    div(
+      h3("Resultados EV2: Integración", style = css(margin = 0, margin_bottom = "12px")),
+      
+      cifra("Cantidad total de unidades:", ev_int1$total_cantidad_unidades),
+      cifra("Densidad:", paste(ev_int1$normativa_densidad, "hab/há")),
+      cifra("Ingresos totales:", ev_int1$total_ingreso |> uf()),
+      cifra("Costos totales:", ev_int1$costo_total |> uf()),
+      cifra("Porcentaje de aumento en densidad:", porcentaje(ev_int1$compensacion_densidad/100)),
+      cifra("Porcentaje de integración social:", ev_int1$p_integracion |> porcentaje()),
+      cifra("Rentabilidad:", ev_int1$rentabilidad |> porcentaje())
+    )
+  })
+  
+  output$resultados_ev_int2 <- renderUI({
+    div(
+      h3("Resultados EV2: Integración y Compensación", style = css(margin = 0, margin_bottom = "12px")),
+      
+      cifra("Cantidad total de unidades:", ev_int2$total_cantidad_unidades),
+      cifra("Densidad:", paste(ev_int2$normativa_densidad, "hab/há")),
+      cifra("Ingresos totales:", ev_int2$total_ingreso |> uf()),
+      cifra("Costos totales:", ev_int2$costo_total |> uf()),
+      cifra("Porcentaje de aumento en densidad:", porcentaje(ev_int2$compensacion_densidad/100)),
+      cifra("Porcentaje de integración social:", ev_int2$p_integracion |> porcentaje()),
+      cifra("Rentabilidad:", ev_int2$rentabilidad |> porcentaje())
+    )
+  })
+  
+  
+  
+  
   
   # —----
   # notificaciones ----
