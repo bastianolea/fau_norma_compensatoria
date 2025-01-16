@@ -284,21 +284,21 @@ ui <- page_fluid(
                               
                               # actionButton("castigo_opciones", "Mostrar betas castigo"),
                               # 
-                              # div(id = "opciones_castigo",
-                              #     
-                              #     numericInput("b_integracion",
-                              #                  "b_integracion",
-                              #                  0.00891, step = 0.0001),
-                              #     numericInput("b_descuento",
-                              #                  "b_descuento",
-                              #                  0.02094, step = 0.0001),
-                              #     numericInput("b_espaciopublico_integracion",
-                              #                  "b_espaciopublico_integracion",
-                              #                  -0.01580, step = 0.0001),
-                              #     numericInput("b_unidades_integracion",
-                              #                  "b_unidades_integracion",
-                              #                  -0.00005, step = 0.00001)
-                              # )
+                              div(id = "opciones_castigo",
+
+                                  numericInput("b_integracion",
+                                               "b_integracion",
+                                               0.00891, step = 0.0001),
+                                  numericInput("b_descuento",
+                                               "b_descuento",
+                                               0.02094, step = 0.0001),
+                                  numericInput("b_espaciopublico_integracion",
+                                               "b_espaciopublico_integracion",
+                                               -0.01580, step = 0.0001),
+                                  numericInput("b_unidades_integracion",
+                                               "b_unidades_integracion",
+                                               -0.00005, step = 0.00001)
+                              ) |> hidden()
                             )
                             
                             
@@ -319,7 +319,7 @@ ui <- page_fluid(
                                     # choices = c("EV-MERC", "EV-INT1", "EV-INT2"), 
                                     choices = c("EV1: Mercado" = "EV-MERC", 
                                                 "EV2: Con Integración" = "EV-INT1", 
-                                                "EV2: Con Integración y Compensación" = "EV-INT2"), 
+                                                "EV3: Con Integración y Compensación" = "EV-INT2"), 
                                     selected = "EV-INT1",
                                     width = "100%"
                                   )
@@ -345,6 +345,8 @@ ui <- page_fluid(
                                     card_header(
                                       h4("Compensación Normativa por Integración Social")
                                     ),
+                                    
+                                    layout_columns(
                                     autonumericInput("compensacion_densidad",
                                                      label = "Aumento en Densidad Permitida (%)",
                                                      currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
@@ -355,7 +357,8 @@ ui <- page_fluid(
                                                      label = "Aumento en Constructibilidad Permitida (%)",
                                                      currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                                      decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
-                                                     value = 0, min = 0),
+                                                     value = 0, min = 0)
+                                    ),
                                     
                                     # Al lado de ambos casilleros poner el texto dinámico "La Densidad cambió de XXXX Hab/Há a XXXX Hab/Há" y "La Constructibilidad permitida cambió de XXXX a XXXX". En la densidad el texto debe adaptarse a si se usa Hab/Ha o Viv/Ha en la declaración de la densidad en pestaña de Terreno.
                                     textOutput("texto_aumento_densidad")
@@ -524,7 +527,8 @@ ui <- page_fluid(
                                       
                                     ),
                                     
-                                    div(
+                                    div(id = "panel_estacionamientos",
+                                        style = css(border_radius = "5px"),
                                       # total estacionamientos
                                       # numericInput("estacionamiento_subterraneo",
                                       #              "Estacionamiento subterraneo p/unid.",
@@ -537,17 +541,17 @@ ui <- page_fluid(
                                       #              0.15, step = 0.05),
                                       
                                       autonumericInput("estacionamiento_subterraneo",
-                                                       "Estacionamiento subterraneo p/unid.",
+                                                       "Estacionamiento subterráneo",
                                                        currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                                        value = 50, min = 0),
                                       autonumericInput("estacionamiento_exterior",
-                                                       "Estacionamiento exterior p/unid.",
+                                                       "Estacionamiento exterior",
                                                        currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                                        value = 50, min = 0),
                                       autonumericInput("estacionamiento_visita",
-                                                       "Estacionamiento visita p/unid.",
+                                                       "Estacionamiento visita",
                                                        currencySymbol = "%", currencySymbolPlacement = "s", align = "left",
                                                        decimalPlaces = 0, decimalCharacter = ",", digitGroupSeparator = ".",
                                                        value = 15, min = 0),
@@ -573,7 +577,7 @@ ui <- page_fluid(
                                                        decimalCharacter = ",", digitGroupSeparator = ".", decimalPlaces = 0,
                                                        value = 150, step = 5),
                                       
-                                      explicacion("En escenarios EV2, considerar precio máximo y rangos establecidos en llamado especial 2024 de Programa DS Nº19 (Res. Exenta 385) o reglamento que corresponda.")
+                                      explicacion("En escenarios EV2 y EV3, considerar precio máximo y rangos establecidos en llamado especial 2024 de Programa DS Nº19 (Res. Exenta 385) o reglamento que corresponda.")
                                     ),
                                     
                                     div(#style = css(padding_top = "16px"),
@@ -855,7 +859,7 @@ ui <- page_fluid(
                               uiOutput("resultados_ev_int1")
                             ),
                             card(
-                              card_header(h3("EV2: Integración y Compensación", style = css(font_size = "160%", min_height = "52px"))),
+                              card_header(h3("EV3: Integración y Compensación", style = css(font_size = "160%", min_height = "52px"))),
                               uiOutput("resultados_ev_int2")
                             )
                             )
@@ -1227,13 +1231,16 @@ server <- function(input, output, session) {
     # browser()
     
     # ('DATOS (CASO-1)'!I6 * R15 + 'DATOS (CASO-1)'!I8 * R15 /'DATOS (CASO-1)'!I11 + 'DATOS (CASO-1)'!I9 * R15 * J20) / 'DATOS (CASO-1)'!I7*-1
-    
+    if (input$castigo) {
     (input$b_integracion * p_integracion() + input$b_espaciopublico_integracion * 
        p_integracion() / calidad_ep() + input$b_unidades_integracion * 
        p_integracion() * # acá está malo
        total_cantidad_unidades()) / 
       input$b_descuento * -1
     # esto no da 44 jamás
+    } else {
+      0
+    }
   })
   
   output$p_integracion2 <- output$p_integracion <- renderText(p_integracion() |> porcentaje())
@@ -1275,10 +1282,18 @@ server <- function(input, output, session) {
   output$area_comun_proyecto <- renderText(area_comun_proyecto() |> mt2())
   
   # máximos vendibles
-  max_unidades_vendibles = reactive(
+  # considetando normativa de densidad compensada
+  max_unidades_vendibles = reactive({
+    # browser()
     (input$sup_total_terreno + input$faja_exterior_eje_ep)/10000 * ifelse(input$unidad_normativa == "hab/ha", 
-                                                                          (normativa_densidad()/4), normativa_densidad()))
-  output$max_unidades_vendibles <- renderText(max_unidades_vendibles() |> round())
+                                                                          (normativa_densidad()/4), normativa_densidad())
+    })
+  # para mostrar el valor sin cambio en la pestaña 1
+  max_unidades_vendibles_sin_normativa = reactive({
+    (input$sup_total_terreno + input$faja_exterior_eje_ep)/10000 * input$normativa_densidad
+    })
+  # output$max_unidades_vendibles <- renderText(max_unidades_vendibles() |> round())
+  output$max_unidades_vendibles <- renderText(max_unidades_vendibles_sin_normativa() |> round())
   
   max_superficie_vendible = reactive(superficie_max_util_const() * (1-(input$superficie_area_comun)/100)) #mt2
   output$max_superficie_vendible <- renderText(max_superficie_vendible() |> mt2())
@@ -1502,7 +1517,10 @@ server <- function(input, output, session) {
   
   
   # total ingresos
-  total_ingreso = reactive(ingreso_deptos() + ingreso_bodega_estacionamiento())
+  total_ingreso = reactive({
+    # browser()
+    ingreso_deptos() + ingreso_bodega_estacionamiento()
+    })
   output$total_ingreso <- renderText(total_ingreso() |> uf())
   
   
@@ -1842,6 +1860,31 @@ server <- function(input, output, session) {
                   class = "alerta")
     }
   })
+  
+  
+  # porcentajes de estacionamientos deben dar 100%
+  suma_estacionamientos <- reactive(input$estacionamiento_subterraneo + input$estacionamiento_exterior)
+  
+  suma_estacionamientos_d <- suma_estacionamientos |> debounce(millis = 500)
+  
+  observeEvent(suma_estacionamientos_d(), {
+    
+    porcentaje <- scales::percent(suma_estacionamientos()/100, accuracy = 1)
+    if (suma_estacionamientos() > 100) {
+      showNotification(glue("Los porcentajes de estacionamientos no pueden sumar más de 100% (suman {porcentaje})"), type = "error")
+      
+      addClass(id = "panel_estacionamientos", class = "alerta")
+      
+      
+    } else if (suma_estacionamientos() < 100) {
+      showNotification(glue("Los porcentajes de estacionamientos no pueden sumar menos de 100% (suman {porcentaje})"), type = "error")
+      
+      addClass(id = "panel_estacionamientos", class = "alerta")
+    } else {
+      removeClass(id = "panel_estacionamientos", class = "alerta")
+    }
+    
+    })
   
 }
 

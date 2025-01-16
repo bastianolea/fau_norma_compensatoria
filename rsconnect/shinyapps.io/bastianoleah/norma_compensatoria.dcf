@@ -5,7 +5,7 @@ account: bastianoleah
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13180950
-bundleId: 9617266
+bundleId: 9617310
 url: https://bastianoleah.shinyapps.io/norma_compensatoria/
 version: 1
 asMultiple: FALSE
