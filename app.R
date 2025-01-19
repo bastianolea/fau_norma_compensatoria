@@ -997,10 +997,10 @@ server <- function(input, output, session) {
   # compensación en escenarios 2 y 3
   observeEvent(input$escenario, {
     
-    if (input$escenario == "EV-MERC") {
-      hide("panel_compensacion")
-    } else {
+    if (input$escenario == "EV-INT2") {
       show("panel_compensacion")
+    } else {
+      hide("panel_compensacion")
     }
   }
   )
